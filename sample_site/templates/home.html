@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+	<title>regular.express</title>
+</head>
+<body>
+	<header>
+		<h1>regular.express</h1>
+	</header>
+	<section>
+		<ul>
+			{% for row in rows  %}
+			<li>
+				<h3>{{row.id}}</h3>
+			</li>
+			{% endfor %}
+		</ul>
+	</section>
+</body>
+</html>
