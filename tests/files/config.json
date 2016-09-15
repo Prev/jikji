@@ -1,0 +1,12 @@
+{
+	"rest_server": {
+		"base_url": "https://test.com/"
+	},
+
+	"path": {
+		"template": "templates",
+		"output": "generated"
+	},
+
+	"pages_xml": "pages.xml"
+}

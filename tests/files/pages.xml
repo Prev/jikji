@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<site>
+	{% for i in range(1, 5) %}
+	<page>
+		<url>{{ i }}.html</url>
+		<context>{{ dict({'i':i}) }}</context>
+		<template>template1.html</template>
+	</page>
+	{% endfor %}
+</site>

@@ -22,7 +22,7 @@ class Model :
 	"""
 	def __init__(self, rest_server_info) :
 		self.base_url = rest_server_info['base_url']
-		self.headers = rest_server_info['headers']
+		self.headers = rest_server_info.get('headers', '')
 
 
 		if self.base_url[-1] == '/' :

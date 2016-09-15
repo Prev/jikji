@@ -1,24 +1,12 @@
 #-*- coding: utf-8 -*-
 
-import os
-
-from config import Config
-from model import Model
-from generator import Generator
-
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-
-
-def run() :
-	conf = Config(BASE_DIR + '/../sample_site/config.json')
-	model = Model(conf.rest_server_info())
-
-	g = Generator(conf, model)
-	g.generate()
-
-
-
 if __name__ == '__main__' :
-	run()
+	import sys
+	from .app import Jikji
+
+	if len(sys.argv) < 2:
+		print('usage: python3 -m jikji <config.json path>')
+		sys.exit(-1)
+
+	app = Jikji(sys.argv[1])
+	app.generate()
