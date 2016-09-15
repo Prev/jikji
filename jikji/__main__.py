@@ -1,4 +1,13 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+"""
+	Jikji
+	----------------
+	Code-less static web generator based on RESTful API Server
+	
+	:author: Prev(prevdev@gmail.com)
+	:license: MIT
+	
+"""
 
 if __name__ == '__main__' :
 	import sys

@@ -1,4 +1,11 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+"""
+	jikji/app
+	----------------
+	Jikji class implements
+
+	:author: Prev(prevdev@gmail.com)
+"""
 
 import os
 

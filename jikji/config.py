@@ -1,11 +1,10 @@
-#-*- coding: utf-8 -*-
-
+# -*- coding: utf-8 -*-
 """
-Jikji/config
-@author Prev(prevdev@gmail.com)
+	jikji/config
+	---------------
+	Config Manage Class
 
-
-Config Manage Class
+	:author: Prev(prevdev@gmail.com)
 """
 
 import os

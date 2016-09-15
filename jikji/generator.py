@@ -1,17 +1,16 @@
-#-*- coding: utf-8 -*-
-
+# -*- coding: utf-8 -*-
 """
-Jikji/Generator
-@author Prev(prevdev@gmail.com)
+	jikji/generator
+	----------------
+	Static page Generator
 
+	First, read pages.xml and render this file via jinja2.
+	while rendering pages.xml, context data will downloaded in rest-server.
 
-Static page Generator
+	Next, parse rendered pages.xml and create static web pages.
 
-First, read pages.xml and render this file via jinja2.
-while rendering pages.xml, context data will downloaded in rest-server.
-
-Next, parse rendered pages.xml and create static web pages.
-
+	
+	:author Prev(prevdev@gmail.com)
 """
 
 import ast

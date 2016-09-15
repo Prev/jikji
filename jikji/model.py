@@ -1,12 +1,10 @@
-#-*- coding: utf-8 -*-
-
+# -*- coding: utf-8 -*-
 """
-Jikji/Model
-@author Prev(prevdev@gmail.com)
+	jikji/model
+	----------------
+	Connect with Rest-Server
 
-Model
-Connect with Rest-Server
-
+	:author: Prev(prevdev@gmail.com)
 """
 
 import urllib.request
@@ -21,13 +19,37 @@ class Model :
 	Init Model instance
 	"""
 	def __init__(self, rest_server_info) :
-		self.base_url = rest_server_info['base_url']
-		self.headers = rest_server_info.get('headers', '')
+		self.set_baseurl( rest_server_info['base_url'] )
+		self.set_headers( rest_server_info.get('headers', {}) )
 
 
-		if self.base_url[-1] == '/' :
-			self.base_url = self.base_url[0:-1]
-	
+	"""
+	Getter / Setter of baseurl
+	"""
+	def set_baseurl(self, value) :
+		if value[-1] == '/' :
+			value = value[0:-1]
+
+		self._baseurl = value
+
+	def get_baseurl(self) :
+		return self._baseurl
+
+
+	"""
+	Getter / Setter of baseurl
+	"""
+	def set_headers(self, value) :
+		if value is None :
+			value = {}
+
+		self._headers = value
+
+	def get_headers(self) :
+		return self._headers
+
+
+
 	"""
 	Get data from Rest Server
 	@params
@@ -40,9 +62,9 @@ class Model :
 		if api[0] != '/' :
 			api = '/' + api
 
-		url = self.base_url + api
-		req = urllib.request.Request(url, data, self.headers)
-		
+		url = self.get_baseurl() + api
+		req = urllib.request.Request(url, data, self.get_headers())
+
 		try :
 			with urllib.request.urlopen(req) as response:
 				page = response.read()
