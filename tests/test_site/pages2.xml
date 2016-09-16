@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<site>
+	<page>
+		<url>/</url>
+		<context>{{ model.get('/users/Prev') }}</context>
+		<template>template2.html</template>
+	</page>
+</site>

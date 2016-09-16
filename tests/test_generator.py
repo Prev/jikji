@@ -14,8 +14,8 @@ import shutil
 from jikji import Jikji
 
 
-def test_generate() :
-	jikji = Jikji('tests/test_site/config.json')
+def test_generate1() :
+	jikji = Jikji('tests/test_site/config1.json')
 	output_dir = jikji.config().output_dir()
 
 	if os.path.exists( output_dir ) :
@@ -28,4 +28,36 @@ def test_generate() :
 			content = file.read()
 
 		assert content == '<div>%s</div>' % i
+
+
+
+def test_generate2() :
+	jikji = Jikji('tests/test_site/config2.json')
+	output_dir = jikji.config().output_dir()
+
+	if os.path.exists( output_dir ) :
+		shutil.rmtree( output_dir )
+
+	jikji.generate()
+
+	with open('%s/index.html' % output_dir, 'r') as file :
+		content = file.read()
+
+
+	# TODO : Read With HTML Parser and check essential points
+	assert content == """<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>author</title>
+</head>
+<body>
+	<div id="content">
+<h1>Prev</h1>
+<div>youngsoo lee</div>
+<a href="https://api.github.com/users/Prev">Go github</a>
+</div>
+	<div id="footer">copyright prevdev@gmail.com</div>
+</body>
+</html>"""
+
 

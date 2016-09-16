@@ -5,8 +5,8 @@
 
 	"path": {
 		"template": "templates",
-		"output": "generated"
+		"output": "generated/1"
 	},
 
-	"pages_xml": "pages.xml"
+	"pages_xml": "pages1.xml"
 }
