@@ -46,12 +46,13 @@ class Generator :
 
 		output_dir = self.config.output_dir()
 
-		cprint.bold('%d pages are found\n-------------------------------------' % len(page_tags))
+		cprint.bold('%d pages are found' % len(page_tags))
+		cprint.line()
 		print(output_dir)
 
 		# template renderer Environment
 		env = jinja2.Environment(
-			loader=jinja2.FileSystemLoader(self.config.tpl_dir())
+			loader=jinja2.FileSystemLoader( self.config.tpl_dir() )
 		)
 		
 		for page in page_tags :
@@ -68,7 +69,7 @@ class Generator :
 
 			cprint.ok('\t- %s' % path[len(output_dir):] )
 
-		print('-------------------------------------')
+		cprint.line()
 		cprint.okb('Generate completed')
 
 
@@ -76,6 +77,7 @@ class Generator :
 
 	"""
 	Render pages.xml via jinja
+	@param pages_xml_path: string
 	@return string
 	"""
 	def _render_pages_xml(self, pages_xml_path) :
@@ -94,10 +96,12 @@ class Generator :
 
 	"""
 	Generate page via page_obj)
-	@param url: url of page (string)
-	@param context: context dict of template (string)
-	@param template: jinja2 template instance
-	@param output_dir: string
+	@params
+		- url: url of page (string)
+		- context: context dict of template (string)
+		- template: jinja2 template instance
+		- output_dir: string
+	
 	@return output_path(string)
 	"""
 	def _generate_page(self, url, context, template, output_dir) :

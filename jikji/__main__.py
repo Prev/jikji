@@ -16,7 +16,6 @@ if __name__ == '__main__' :
 	from .app import Jikji
 	from . import cprint
 
-
 	if len(sys.argv) < 2:
 		cprint.error('usage: python3 -m jikji <config.json path>')
 		sys.exit(-1)

@@ -1,6 +1,6 @@
 {
 	"rest_server": {
-		"base_url": "https://test.com/"
+		"base_url": "http://echo.jsontest.com"
 	},
 
 	"path": {

@@ -21,5 +21,6 @@ def test_config() :
 	assert config.tpl_dir() == 'tests/test_site/templates'
 	assert config.output_dir() == 'tests/test_site/generated/1'
 	assert config.pages_xml_path() == 'tests/test_site/pages1.xml'
-	assert config.rest_server_info()['base_url'] == 'https://test.com/'
+	
+	assert config.rest_server_info()['base_url'] == 'http://echo.jsontest.com'
 

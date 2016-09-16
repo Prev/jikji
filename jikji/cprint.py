@@ -8,6 +8,9 @@
 	:author Prev(prevdev@gmail.com)
 """
 
+import os
+
+
 class bcolors:
 	HEADER = '\033[95m'
 	OKBLUE = '\033[94m'
@@ -39,3 +42,12 @@ def bold(msg) :
 
 def underline(msg) :
 	print(bcolors.UNDERLINE + msg + bcolors.ENDC)
+
+
+def line() :
+	#rows, columns = os.popen('stty size', 'r').read().split()
+	po = os.popen('stty size', 'r').read()
+	
+	if po :
+		rows, columns = pp2.split()
+		print('-' * (int(columns) - 1))

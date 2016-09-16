@@ -10,7 +10,7 @@
 import os
 
 from .config import Config
-from .model import Model
+from .model import Model, Cache
 from .generator import Generator
 
 
@@ -18,10 +18,13 @@ class Jikji :
 
 	def __init__(self, config_path) :
 		self._conf = Config( config_path )
-		self._model = Model( self._conf.rest_server_info() )
+		self._model = Model(
+			rest_server_info = self._conf.rest_server_info(),
+			cache = Cache(self._conf.site_path)
+		)
 
-		self.generator = Generator(self._conf, self._model)
-	
+		self._generator = Generator(self._conf, self._model)
+
 
 	def config(self) :
 		return self._conf
@@ -32,5 +35,5 @@ class Jikji :
 
 
 	def generate(self) :
-		self.generator.generate()
+		self._generator.generate()
 
