@@ -8,12 +8,23 @@
 """
 
 import os
+import sys
 import json
+from . import cprint
 
 class Config :
 	
 	def __init__(self, config_file_path) :
-		config_file = open(config_file_path, 'r')
+		try :
+			config_file = open(config_file_path, 'r')
+			
+		except FileNotFoundError :
+			cprint.error('Error on jikji.Config.__init__')
+			cprint.bold('Config file "%s" NOT FOUND' % config_file_path)
+			sys.exit(-1)
+
+
+
 		config_data = config_file.read()
 
 		self.site_path = os.path.dirname(config_file_path)

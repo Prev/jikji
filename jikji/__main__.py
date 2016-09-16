@@ -11,11 +11,20 @@
 
 if __name__ == '__main__' :
 	import sys
+	import os.path
+
 	from .app import Jikji
+	from . import cprint
+
 
 	if len(sys.argv) < 2:
-		print('usage: python3 -m jikji <config.json path>')
+		cprint.error('usage: python3 -m jikji <config.json path>')
 		sys.exit(-1)
 
-	app = Jikji(sys.argv[1])
+	config_file = sys.argv[1]
+
+	if os.path.isdir(config_file) :
+		config_file += '/config.json'
+
+	app = Jikji(config_file)
 	app.generate()
