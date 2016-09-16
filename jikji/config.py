@@ -8,6 +8,7 @@
 """
 
 import os
+import os.path
 import sys
 import json
 from . import cprint
@@ -15,6 +16,9 @@ from . import cprint
 class Config :
 	
 	def __init__(self, config_file_path) :
+		if os.path.isdir(config_file_path) :
+			config_file_path += '/config.json'
+
 		try :
 			config_file = open(config_file_path, 'r')
 			

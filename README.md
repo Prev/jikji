@@ -1,13 +1,25 @@
 # Jikji
 Code-less static web generator based on RESTful API Server
-
-
+  
+  
 ## concept
-- Model : RESTFul API Server (You can `cloudant`)
+- Model : RESTFul API Server (You can you server like [cloudant](https://cloudant.com/))
 - Controller: None
 - View: template html
 
 
+## usage
+```shell
+python3 -m jikji sample_site
+```
+
+```python
+from jikji import Jikji
+jikji = Jikji('sample_site')
+jikji.generate()
+```
+
+  
 ## config.json
 Configure directory structure of site, and rest api server's information.
 
@@ -29,6 +41,7 @@ Configure directory structure of site, and rest api server's information.
 }
 ```
 
+  
 
 ## pages.xml
 This is file to config generating static website.
@@ -46,6 +59,7 @@ Specially, `pages.xml` is also parsed like template. So, in `pages.xml`, you can
 You can use `model` variable in pages.xml, which you can connect to `rest-server` db.
 After getting data in rest-server, you can make `page tag` with this data.
 
+  
 
 #### example
 

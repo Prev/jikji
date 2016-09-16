@@ -11,7 +11,6 @@
 
 if __name__ == '__main__' :
 	import sys
-	import os.path
 
 	from .app import Jikji
 	from . import cprint
@@ -21,9 +20,6 @@ if __name__ == '__main__' :
 		sys.exit(-1)
 
 	config_file = sys.argv[1]
-
-	if os.path.isdir(config_file) :
-		config_file += '/config.json'
 
 	app = Jikji(config_file)
 	app.generate()

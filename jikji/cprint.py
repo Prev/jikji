@@ -49,5 +49,5 @@ def line() :
 	po = os.popen('stty size', 'r').read()
 	
 	if po :
-		rows, columns = pp2.split()
+		rows, columns = po.split()
 		print('-' * (int(columns) - 1))
