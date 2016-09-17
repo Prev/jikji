@@ -13,6 +13,7 @@ import urllib.error
 import base64
 import json
 import os
+from . import cprint
 
 
 class Cache :
@@ -113,10 +114,12 @@ class Model :
 			api = '/' + api
 		url = self.get_baseurl() + api
 
+		cprint.write("GET '%s'.. " % api)
 
 		if immutable == True :
 			cachedata = self.cache.get(url)
 			if cachedata is not None :
+				cprint.ok('finish (use cache)')
 				return cachedata
 
 
@@ -129,6 +132,7 @@ class Model :
 			if err.code == 404 :
 				cprint.error('404 Error on "%s"' % url)
 
+		cprint.ok('finish')
 
 		page = page.decode('utf-8')
 		result = json.loads(page)

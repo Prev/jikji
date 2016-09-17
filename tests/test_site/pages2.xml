@@ -2,7 +2,12 @@
 <site>
 	<page>
 		<url>/</url>
-		<context>{{ model.get('/users/Prev') }}</context>
+		<context>{{
+			model.get(
+				api = '/users/Prev',
+				immutable = True
+			)
+		}}</context>
 		<template>template2.html</template>
 	</page>
 </site>

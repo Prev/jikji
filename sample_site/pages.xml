@@ -11,7 +11,14 @@
 	{% for row in all_docs['rows'] %}
 	<page>
 		<url>/doc/{{ row['id'] }}/</url>
-		<context>{{ model.get('/test/' + row['id']) }}</context>
+		<context>
+			{{
+				model.get(
+					api = '/test/' + row['id'],
+					immutable = True
+				)
+			}}
+		</context>
 		<template>document.html</template>
 	</page>
 	{% endfor %}

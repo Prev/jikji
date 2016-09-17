@@ -15,6 +15,7 @@
 
 import ast
 import os
+import time
 import jinja2
 import xml.etree.ElementTree as ET
 from . import cprint
@@ -36,7 +37,14 @@ class Generator :
 	Read pages.xml, render with jinja2, parse rendered file, and create static web pages.
 	"""
 	def generate(self) :
-		print('Start generating')
+		start_time = time.time()
+
+
+		cprint.bold('Start generating "%s"' % self.config.site_path)
+
+		cprint.section('Parse pages.xml with Rest Server')
+		cprint.bold('With Rest server "%s"\n' % self.config.rest_server_info()['base_url'])
+
 
 		# render pages.xml
 		rendered_data = self._render_pages_xml( self.config.pages_xml_path() )
@@ -46,9 +54,11 @@ class Generator :
 
 		output_dir = self.config.output_dir()
 
-		cprint.bold('%d pages are found' % len(page_tags))
+
 		cprint.line()
-		print(output_dir)
+		cprint.section('Rendering %d pages' % len(page_tags))
+		cprint.bold('Output in "%s"\n' % output_dir)
+
 
 		# template renderer Environment
 		env = jinja2.Environment(
@@ -62,15 +72,16 @@ class Generator :
 			#  because in pages xml, context value is not printed with json.dump
 			path = self._generate_page(
 				url = page.find('url').text,
-				context = ast.literal_eval( page.find('context').text ),
+				context = ast.literal_eval( page.find('context').text.strip() ),
 				template = template,
 				output_dir = output_dir
 			)
 
-			cprint.ok('\t- %s' % path[len(output_dir):] )
+			cprint.ok('%s' % path[len(output_dir):] )
 
-		cprint.line()
-		cprint.okb('Generate completed')
+
+		# cprint.line()
+		cprint.section('Generate completed in %s seconds' % round(time.time() - start_time, 2), **{'blue':True})
 
 
 

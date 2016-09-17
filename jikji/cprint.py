@@ -8,46 +8,38 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-import os
+from py.io import TerminalWriter
 
+_tw = TerminalWriter()
 
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-
-
-def okb(msg) :
-	print(bcolors.OKBLUE + msg + bcolors.ENDC)
 
 def ok(msg) :
-	print(bcolors.OKGREEN + msg + bcolors.ENDC)
+	_tw.line(msg, **{'green': True})
+
+def okb(msg) :
+	_tw.line(msg, **{'blue': True})
 
 def warn(msg) :
-	print(bcolors.WARNING + msg + bcolors.ENDC)
+	_tw.line(msg, **{'yellow': True})
 
 def fail(msg) :
-	print(bcolors.FAIL + msg + bcolors.ENDC)
+	_tw.line(msg, **{'red': True})
 	
 def error(msg) :
 	fail(msg)
 
 def bold(msg) :
-	print(bcolors.BOLD + msg + bcolors.ENDC)
+	_tw.line(msg, **{'bold': True})
 
-def underline(msg) :
-	print(bcolors.UNDERLINE + msg + bcolors.ENDC)
+def write(msg, **markup) :
+	_tw.write(msg, **markup)
 
+def line(msg='', **markup) :
+	_tw.line(msg, **markup)
 
-def line() :
-	#rows, columns = os.popen('stty size', 'r').read().split()
-	po = os.popen('stty size', 'r').read()
-	
-	if po :
-		rows, columns = po.split()
-		print('-' * (int(columns) - 1))
+def sep(sep, title, **markup) :
+	_tw.sep(sep, title, **markup)
+
+def section(title, **markup) :
+	_tw.sep('-', title, **markup)
+

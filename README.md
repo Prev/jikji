@@ -2,17 +2,20 @@
 Code-less static web generator based on RESTful API Server
   
   
-## concept
+## Concept
 - Model : RESTFul API Server (You can you server like [cloudant](https://cloudant.com/))
 - Controller: None
 - View: template html
 
 
-## usage
+## Usage
+
+#### shell
 ```shell
 python3 -m jikji sample_site
 ```
 
+#### python
 ```python
 from jikji import Jikji
 jikji = Jikji('sample_site')
