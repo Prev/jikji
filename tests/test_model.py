@@ -15,7 +15,7 @@ from jikji.model import ModelException
 
 def test_cache() :
 	jikji = Jikji('tests/test_site/config1.json')
-	model = jikji.model()
+	model = jikji.model
 
 	model.cache.set('foo', 'bar')
 	assert model.cache.get('foo') == 'bar'
@@ -24,7 +24,7 @@ def test_cache() :
 
 def test_model1() :
 	jikji = Jikji('tests/test_site/config1.json')
-	model = jikji.model()
+	model = jikji.model
 	
 	assert model.get('/foo/bar')['foo'] == 'bar'
 	assert model.get('over/watch', None)['over'] == 'watch'
@@ -37,7 +37,7 @@ def test_model1() :
 
 def test_model2() :
 	jikji = Jikji('tests/test_site/config2.json')
-	model = jikji.model()
+	model = jikji.model
 	
 
 	assert model.get('/users/Prev')['login'] == 'Prev'

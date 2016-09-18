@@ -20,9 +20,12 @@ import time
 import jinja2
 import xml.etree.ElementTree as ET
 import traceback
+import shutil
 
 from . import cprint
 from .model import ModelException
+
+
 
 class Generator :
 	
@@ -50,15 +53,15 @@ class Generator :
 		self._gen_start_time = time.time()
 
 
-		cprint.bold('Start generating "%s"' % os.path.abspath(self.config.site_path))
+		cprint.bold('Start generating "%s"' % os.path.abspath(self.config.sitepath))
 
 		cprint.section('Parse pages.xml with Rest Server')
-		cprint.bold('With Rest server "%s"\n' % self.config.rest_server_info()['base_url'])
+		cprint.bold('With Rest server "%s"\n' % self.config.server_info['base_url'])
 
 
 		# render pages.xml
 		try :
-			rendered_data = self._render_pages_xml( self.config.pages_xml_path() )
+			rendered_data = self._render_pages_xml( self.config.path.pages_xml )
 		
 		except ModelException as e:
 			self._finish(False, 'Model Error', e)
@@ -71,7 +74,7 @@ class Generator :
 		# parse rendered pages.xml via xml.etree.ElementTree
 		page_tags = ET.fromstring(rendered_data).findall('page')
 
-		output_dir = self.config.output_dir()
+		output_dir = self.config.path.output
 
 
 		cprint.line()
@@ -81,9 +84,10 @@ class Generator :
 
 		# template renderer Environment
 		env = jinja2.Environment(
-			loader=jinja2.FileSystemLoader( self.config.tpl_dir() )
+			loader=jinja2.FileSystemLoader( self.config.path.tpl )
 		)
 		
+
 		for page in page_tags :
 			template = env.get_template( page.find('template').text )
 
@@ -93,7 +97,7 @@ class Generator :
 			)
 
 			# remove common string of output_dir in path
-			trimed_path = path[len(output_dir):]
+			trimed_path = path[ len(output_dir) : ]
 
 			try :
 				# Context is not parsed with json but ast
@@ -112,7 +116,12 @@ class Generator :
 			cprint.ok('%s' % trimed_path )
 
 
+		for asset_dir in self.config.path.assets :
+			self._copy_asset_files(asset_dir, asset_dir, output_dir)
+
+
 		self._finish(True)
+
 
 
 	def _finish(self, is_success, err_cause=None, err_instance=None) :
@@ -135,7 +144,6 @@ class Generator :
 			sys.exit(-1)
 
 		
-
 
 	def _render_pages_xml(self, pages_xml_path) :
 		""" Render pages.xml via jinja
@@ -188,6 +196,30 @@ class Generator :
 
 
 	
+	def _copy_asset_files(self, dir, asset_dir, output_dir) :
+		list = os.listdir(dir)
+		
+		for file in list :
+			if file[0] == '.' :
+				# continue if file is hidden
+				continue
 
-	
+			filepath = "%s/%s" % (dir, file)
+
+			if os.path.isdir(filepath) :
+				self._copy_asset_files(filepath, asset_dir, output_dir)
+
+			else :
+				# filepath that common string of asset_dir is removed
+				trimed_path = filepath[ len(asset_dir) : ] 
+				dst_path = "%s%s" % (output_dir, trimed_path)
+
+				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
+				shutil.copyfile(
+					src = filepath,
+					dst = dst_path
+				)
+
+				cprint.line('%s [Asset]' % trimed_path)
+
 

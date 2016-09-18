@@ -12,6 +12,35 @@ import sys
 import json
 from . import cprint
 
+
+class ConfigPath :
+
+	def __init__(self, sitepath, data) :
+		self._sitepath = sitepath
+		self._data = data
+
+
+	@property
+	def tpl(self):
+		return "%s/%s" % (self._sitepath, self._data['path']['template'])
+	
+
+	@property
+	def output(self):
+		return "%s/%s" % (self._sitepath, self._data['path']['output'])
+
+
+	@property
+	def assets(self):
+		asset_lists = self._data['path'].get('assets', [])
+		return [ "%s/%s" % (self._sitepath, d) for d in asset_lists ]
+
+
+	@property
+	def pages_xml(self):
+		return "%s/%s" % (self._sitepath, self._data['pages_xml'])
+
+
 class Config :
 	
 	def __init__(self, config_file_path) :
@@ -30,22 +59,16 @@ class Config :
 
 		config_data = config_file.read()
 
-		self.site_path = os.path.dirname(config_file_path)
-		self.config = json.loads(config_data)
+		self._config = json.loads(config_data)
+
+		self.sitepath = os.path.dirname(config_file_path)
+		self.path = ConfigPath(self.sitepath, self._config)
+	
+
+	@property
+	def server_info(self) :
+		return self._config['rest_server']
 
 
-	def tpl_dir(self) :
-		return "%s/%s" % (self.site_path, self.config['path']['template'])
 
-
-	def output_dir(self) :
-		return "%s/%s" % (self.site_path, self.config['path']['output'])
-
-
-	def pages_xml_path(self) :
-		return "%s/%s" % (self.site_path, self.config['pages_xml'])
-
-
-	def rest_server_info(self) :
-		return self.config['rest_server']
 

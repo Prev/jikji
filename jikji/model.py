@@ -18,7 +18,7 @@ from . import cprint
 class Cache :
 
 	def __init__(self, sitepath) :
-		""" Init Cache Class with site_path
+		""" Init Cache Class with sitepath
 		"""
 		cachedir = sitepath + '/.jikji/cache/'
 		os.makedirs(cachedir, exist_ok=True )
@@ -107,7 +107,7 @@ class Model :
 
 
 
-	def _rest(self, type, api, data=None) :
+	def _rest(self, type, api, data=None, parsejson=True) :
 		""" Rest Call to server
 		:params
 			- type: GET, POST, PUT, or DELETE
@@ -141,7 +141,10 @@ class Model :
 			raise me
 
 
-		result = r.json()
+		if parsejson :
+			result = r.json()
+		else :
+			result = r.text
 		
 		cprint.ok('finish')
 		return result

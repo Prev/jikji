@@ -38,7 +38,10 @@ Configure directory structure of site, and rest api server's information.
 	},
 	"path": {
 		"template": "templates",
-		"output": "generated"
+		"output": "generated",
+		"assets": [
+			"assets"
+		]
 	},
 	"pages_xml": "pages.xml"
 }
@@ -47,8 +50,8 @@ Configure directory structure of site, and rest api server's information.
   
 
 ## pages.xml
-This is file to config generating static website.
-Each `page tag` generate one static website, and it has 3 properties.
+Config pages of static website.
+Each `page tag` generates one static website, and it has 3 properties.
 
 
 - `url` is URL of each output static page.
@@ -85,7 +88,7 @@ After getting data in rest-server, you can make `page tag` with this data.
 </site>
 ```
 
-After template is render by jinja, `jikji` read rendered file and generate static web site. Template files used in static page are also rendered with `jinja`.  
+After template is rendered by jinja, `jikji` read rendered file and generate static web site. Template files used in static page are also rendered with `jinja`.  
 Data written in `context` tag will be injected in process of rendering.
 
 
