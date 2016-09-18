@@ -27,7 +27,7 @@ def test_model1() :
 	model = jikji.model()
 	
 	assert model.get('/foo/bar')['foo'] == 'bar'
-	assert model.get('over/watch', None, True)['over'] == 'watch'
+	assert model.get('over/watch', None)['over'] == 'watch'
 	assert model.get(
 		api = 'hello/world/brave/new',
 		immutable = True

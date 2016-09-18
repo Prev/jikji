@@ -14,27 +14,28 @@ _tw = TerminalWriter()
 
 
 def ok(msg) :
-	_tw.line(msg, **{'green': True})
+	line(msg, **{'green': True})
 
 def okb(msg) :
-	_tw.line(msg, **{'blue': True})
+	line(msg, **{'blue': True})
 
 def warn(msg) :
-	_tw.line(msg, **{'yellow': True})
+	line(msg, **{'yellow': True})
 
 def fail(msg) :
-	_tw.line(msg, **{'red': True})
+	line(msg, **{'red': True})
 	
 def error(msg) :
 	fail(msg)
 
 def bold(msg) :
-	_tw.line(msg, **{'bold': True})
+	line(msg, **{'bold': True})
 
 def write(msg, **markup) :
 	_tw.write(msg, **markup)
 
 def line(msg='', **markup) :
+	msg = str(msg)
 	_tw.line(msg, **markup)
 
 def sep(sep, title, **markup) :

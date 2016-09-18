@@ -33,6 +33,7 @@ def test_generate1() :
 
 def test_generate2() :
 	jikji = Jikji('tests/test_site/config2.json')
+	model = jikji.model()
 	output_dir = jikji.config().output_dir()
 
 	if os.path.exists( output_dir ) :
@@ -42,6 +43,9 @@ def test_generate2() :
 
 	with open('%s/index.html' % output_dir, 'r') as file :
 		content = file.read()
+
+
+	assert model.cache.get( model.geturl('/users/Prev') ) is not None
 
 
 	# TODO : Read With HTML Parser and check essential points

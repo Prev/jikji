@@ -60,11 +60,11 @@ class Generator :
 		try :
 			rendered_data = self._render_pages_xml( self.config.pages_xml_path() )
 		
-		except ModelException:
-			self._finish(False, 'Model Error')
+		except ModelException as e:
+			self._finish(False, 'Model Error', e)
 
-		except jinja2.exceptions.TemplateError :
-			self._finish(False, 'Template Error occurs in pages.xml')
+		except jinja2.exceptions.TemplateError as e :
+			self._finish(False, 'Template Error occurs in pages.xml', e)
 
 
 
@@ -97,16 +97,16 @@ class Generator :
 
 			try :
 				# Context is not parsed with json but ast
-				#  because in pages xml, context value is not printed with json.dump
+				#  because in pages xml, context value is not printed with json.dumps
 				self._generate_page(
 					output_file = path,
 					context = ast.literal_eval( page.find('context').text.strip() ),
 					template = template,
 				)
 			
-			except jinja2.exceptions.TemplateError :
+			except jinja2.exceptions.TemplateError as e :
 				cprint.error('%s' % trimed_path )
-				self._finish(False, 'Template Error')
+				self._finish(False, 'Template Error', e)
 
 
 			cprint.ok('%s' % trimed_path )
@@ -115,13 +115,22 @@ class Generator :
 		self._finish(True)
 
 
-	def _finish(self, is_success, err_cause=None) :
+	def _finish(self, is_success, err_cause=None, err_instance=None) :
 		if is_success :
 			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), **{'blue':True})
 		
 		else :
 			cprint.section()
-			traceback.print_exc()
+			
+			if type(err_instance) == jinja2.exceptions.TemplateSyntaxError :
+				cprint.error( 'jinja2.exceptions.TemplateSyntaxError: ' + err_instance.message )
+				cprint.line( '\nIn line %d:' % err_instance.lineno )
+				cprint.line( err_instance.source.splitlines()[ err_instance.lineno - 1 ].strip() )
+				cprint.line()
+
+			else :
+				traceback.print_exc()
+
 			cprint.section('Generation Stopped by ' + err_cause , **{'red':True})
 			sys.exit(-1)
 
@@ -140,7 +149,8 @@ class Generator :
 
 		tpl = jinja2.Template(pages_config_content)
 		rendered_xml = tpl.render({
-			'model': self.model
+			'model': self.model,
+			'time': time
 		})
 
 		return rendered_xml

@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <site>
 	{% set all_docs = model.get('/test/_all_docs') %}
+	{% set meta = model.post(
+		api = '/test',
+		data = {
+			'type': 'temp',
+			'created': time.strftime('%Y-%m-%d %H:%M:%S')
+		}
+	) %}
+
+
 	<page>
 		<url>/</url>
-		<context>{{ all_docs }}</context>
+		<context>{{ dict(docs = all_docs, meta = meta) }}</context>
 		<template>home.html</template>
 	</page>
 

@@ -79,68 +79,140 @@ class Model :
 
 		self._baseurl = value
 
+
 	def get_baseurl(self) :
 		return self._baseurl
 
 
 
-	def set_headers(self, value) :
-		if value is None :
-			value = {}
+	def set_headers(self, dictval) :
+		if dictval is None :
+			dictval = {}
 
-		self._headers = value
+		if dictval.get('Content-Type') is None :
+			dictval['Content-Type'] = 'application/json'
+
+		self._headers = dictval
+
 
 	def get_headers(self) :
 		return self._headers
 
 
 
+	def geturl(self, api) :
+		if api[0] != '/' :
+			api = '/' + api
+		return self.get_baseurl() + api
 
-	def get(self, api, data=None, immutable=False) :
-		""" Get data from Rest Server
+
+
+	def _rest(self, type, api, data=None) :
+		""" Rest Call to server
 		:params
-			- api: api string (document id or predefined api like '_all_docs')
+			- type: GET, POST, PUT, or DELETE
+			- api: api string appended to baseurl
 			- data: url form data (default: None)
-			- immutable: if immutable, make cache with key of api url (default: False)
 
 		:return json-parsed object
 		"""
 
-		# Api URL validating
-		if api[0] != '/' :
-			api = '/' + api
-		url = self.get_baseurl() + api
+		cprint.write("%s '%s' " % (type.upper(), api))
 
-		cprint.write("GET '%s'.. " % api)
+		if data is not None :
+			data = json.dumps(data)
 
 
-		# If immutable, use cache
-		if immutable == True :
-			cachedata = self.cache.get(url)
-			if cachedata is not None :
-				cprint.ok('finish (use cache)')
-				return cachedata
+		# Call proper method of requests (maybe GET, POST or ext)
+		r = getattr(requests, type.lower())(
+			url = self.geturl(api),
+			data = data,
+			headers = self.get_headers()
+		)
 
-
-		# Raise ModelException when error occurs
-		# Generater will handle Error and stop generating
-		r = requests.get(url, data=data, headers=self.get_headers())
 		try :
 			r.raise_for_status()
 
 		except requests.exceptions.HTTPError as e :
+			# Raise ModelException when error occurs
+			# Generater will handle Error and stop generating
 			me = ModelException(HTTPError=e)
 			cprint.error('%s' % me.status)
 			raise me
 
 
 		result = r.json()
+		
 		cprint.ok('finish')
+		return result
+
+
+	def get(self, api, data=None, immutable=False) :
+		""" Send a GET request to REST Sever
+		:params
+			- api: api string
+			- data: url form data (default: None)
+			- immutable: if immutable, make cache with key of api url (default: False)
+
+		:return json-parsed object
+		"""
+
+		url = self.geturl(api)
+
+		# If immutable, use cache
+		if immutable == True :
+			cachedata = self.cache.get(url)
+			if cachedata is not None :
+				cprint.write("GET '%s' " % api)
+				cprint.ok('finish (use cache)')
+				return cachedata
+
+
+		result = self._rest('GET', api, data)
 
 		if immutable == True :
 			self.cache.set(url, result)
 
 		return result
+
+
+
+	def post(self, api, data=None) :
+		""" Send a POST request to REST Sever
+		:params
+			- api: api string
+			- data: url form data (default: None)
+
+		:return json-parsed object
+		"""
+		return self._rest('POST', api, data)
+
+
+
+	def put(self, api, data=None) :
+		""" Send a PUT request to REST Sever
+		:params
+			- api: api string
+			- data: url form data (default: None)
+
+		:return json-parsed object
+		"""
+		return self._rest('PUT', api, data)
+
+
+
+	def delete(self, api, data=None) :
+		""" Send a DELETE request to REST Sever
+		:params
+			- api: api string
+			- data: url form data (default: None)
+
+		:return json-parsed object
+		"""
+		return self._rest('DELETE', api, data)
+
+
+
 
 
 class ModelException(Exception) :
