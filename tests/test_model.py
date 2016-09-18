@@ -10,6 +10,7 @@
 import pytest
 
 from jikji import Jikji
+from jikji.model import ModelException
 
 
 def test_cache() :
@@ -40,8 +41,15 @@ def test_model2() :
 	
 
 	assert model.get('/users/Prev')['login'] == 'Prev'
+	
 	assert model.get(
 		api = '/users/Luavis',
 		immutable = True
 	)['login'] == 'Luavis'
-	
+
+
+	try :
+		model.get('/invalid_404_page')
+	except ModelException as e :
+		assert e.status == '404 NOT FOUND'
+
