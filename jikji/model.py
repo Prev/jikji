@@ -131,7 +131,6 @@ class Model :
 		except requests.exceptions.HTTPError as e :
 			me = ModelException(HTTPError=e)
 			cprint.error('%s' % me.status)
-
 			raise me
 
 

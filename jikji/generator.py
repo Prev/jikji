@@ -63,6 +63,9 @@ class Generator :
 		except ModelException:
 			self._finish(False, 'Model Error')
 
+		except jinja2.exceptions.TemplateError :
+			self._finish(False, 'Template Error occurs in pages.xml')
+
 
 
 		# parse rendered pages.xml via xml.etree.ElementTree
@@ -101,10 +104,8 @@ class Generator :
 					template = template,
 				)
 			
-			except jinja2.exceptions.TemplateError as e :
+			except jinja2.exceptions.TemplateError :
 				cprint.error('%s' % trimed_path )
-				traceback.print_exc()
-
 				self._finish(False, 'Template Error')
 
 
@@ -117,7 +118,10 @@ class Generator :
 	def _finish(self, is_success, err_cause=None) :
 		if is_success :
 			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), **{'blue':True})
+		
 		else :
+			cprint.section()
+			traceback.print_exc()
 			cprint.section('Generation Stopped by ' + err_cause , **{'red':True})
 			sys.exit(-1)
 

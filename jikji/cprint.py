@@ -40,6 +40,6 @@ def line(msg='', **markup) :
 def sep(sep, title, **markup) :
 	_tw.sep(sep, title, **markup)
 
-def section(title, **markup) :
+def section(title=None, **markup) :
 	_tw.sep('-', title, **markup)
 
