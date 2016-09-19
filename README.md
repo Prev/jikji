@@ -1,21 +1,20 @@
 # Jikji
-Code-less static web generator based on RESTful API Server
-  
-  
-## Concept
-- Model : RESTFul API Server (You can you server like [cloudant](https://cloudant.com/))
-- Controller: None
-- View: template html
+[![Build Status](https://travis-ci.org/Prev/jikji.svg?branch=master)](https://travis-ci.org/Prev/jikji)  
+
+
+Code-less static web generator based on RESTFul API Server
+
+First, web site needs `view` template file like **html**.
+Then, it needs `model` that will be injected to template's **context**. In `jikji`, we use `model` as remote RESTFul API Server like [cloudant](https://cloudant.com/).
+
+Code for getting data from `model` and generate `template file` is **NOT** needed.
 
 
 ## Usage
-
-#### shell
 ```shell
-python3 -m jikji sample_site
+pip install jikji
 ```
 
-#### python
 ```python
 from jikji import Jikji
 jikji = Jikji('sample_site')
