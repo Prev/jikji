@@ -10,3 +10,8 @@ install:
 script:
   - pip install -r requirements.txt
   - python -m pytest
+
+notifications:
+  email: false
+  slack: prevlab:duJn4BAET8sPRW9wpKVpnY97
+  
