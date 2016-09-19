@@ -13,5 +13,9 @@ setup(
 	url = 'https://github.com/Prev/jikji',
 	keywords = ['static-web', 'generator'],
 
-	install_requires=[],
+	install_requires=[
+		'Jinja2>=2.4',
+		'requests>=2.11',
+		'py>=1.4',
+	],
 )
