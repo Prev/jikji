@@ -4,7 +4,14 @@ python:
   - "3.4"
   - "3.5"
 install:
-  - pip install jikji
+  - pip install pytest
+  - pip install .
+
 script:
-  - python -m jikji sample_site
-  - python pytest tests
+  - pip install -r requirements.txt
+  - python -m pytest
+
+notifications:
+  email: false
+  slack: prevlab:duJn4BAET8sPRW9wpKVpnY97
+  
