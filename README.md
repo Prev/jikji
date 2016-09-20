@@ -7,13 +7,16 @@ Code-less static web generator based on RESTFul API Server
 First, web site needs `view` template file like **html**.
 Then, it needs `model` that will be injected to template's **context**. In `jikji`, we use `model` as remote RESTFul API Server like [cloudant](https://cloudant.com/).
 
-Code for getting data from `model` and generate `template file` is **NOT** needed.
+**Code** for getting data from `model` and generate `template` file is **NOT** needed (Simply, `Controller` code is NOT needed).
 
 
 ## Usage
-```shell
-pip install jikji
+```bash
+$ pip install jikji
+$ python3 -m jikji sample_site
 ```
+
+or
 
 ```python
 from jikji import Jikji
@@ -88,6 +91,6 @@ After getting data in rest-server, you can make `page tag` with this data.
 ```
 
 After template is rendered by jinja, `jikji` read rendered file and generate static web site. Template files used in static page are also rendered with `jinja`.  
-Data written in `context` tag will be injected in process of rendering.
+Data written on `context` tag will be injected in process of rendering.
 
 
