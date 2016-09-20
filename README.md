@@ -1,19 +1,32 @@
 # Jikji
+[![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi)]
 [![Build Status](https://travis-ci.org/Prev/jikji.svg?branch=master)](https://travis-ci.org/Prev/jikji)  
 
+Static website generator based on RESTFul Server
 
-Code-less static web generator based on RESTFul API Server
 
-First, web site needs `view` template file like **html**.
-Then, it needs `model` that will be injected to template's **context**. In `jikji`, we use `model` as remote RESTFul API Server like [cloudant](https://cloudant.com/).
+## What's different
+In common static website generator like [Jekyll](https://jekyllrb.com/),   it transform **plain text** like mardown to html.
 
-**Code** for getting data from `model` and generate `template` file is **NOT** needed (Simply, `Controller` code is NOT needed).
+But `jikji` generate pages based on **JSON** data returned in RESTFul Server.  
+We call this JSON `model`.
+
+You can use "Rest-base Cloud Database" like [IBM Cloudant](https://cloudant.com/) as RESTFul Server, 
+so you don't need to code RESTFul server yourself.
+
+
+After getting `model`, we can access it in template like `{{ article_content }}`.
+
+
+**Code** for getting data from `model` and generate `template` is **NOT** needed.  
+You just write some configs and templates of website, then `jikji` will create static website greatly.
+
 
 
 ## Usage
 ```bash
 $ pip install jikji
-$ python3 -m jikji sample_site
+$ python -m jikji sample_site
 ```
 
 or
@@ -24,11 +37,16 @@ jikji = Jikji('sample_site')
 jikji.generate()
 ```
 
+
+# template engine
+`jikji` use [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
+You can see template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/)
+
+
   
 ## config.json
 Configure directory structure of site, and rest api server's information.
 
-#### example
 ```json
 {
 	"rest_server": {
@@ -64,12 +82,9 @@ Each `page tag` generates one static website, and it has 3 properties.
 
 Specially, `pages.xml` is also parsed like template. So, in `pages.xml`, you can use `for`, `foreach`, `if`, and other grammars.
 
-You can use `model` variable in pages.xml, which you can connect to `rest-server` db.
-After getting data in rest-server, you can make `page tag` with this data.
+You can use `model` variable in pages.xml, which you can connect to **RESTFul Server**.
+After getting data in RESTFul Server, you can make **page tag** with model data like below.
 
-  
-
-#### example
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -90,7 +105,11 @@ After getting data in rest-server, you can make `page tag` with this data.
 </site>
 ```
 
-After template is rendered by jinja, `jikji` read rendered file and generate static web site. Template files used in static page are also rendered with `jinja`.  
-Data written on `context` tag will be injected in process of rendering.
+After template is rendered, `jikji` generate pages by this information.
+
+First, generator get template file declared in `template` tag.  
+And then, inject `context` data to template and render it.
+Finally, create static page file with name declared in `url` tag.
+
 
 

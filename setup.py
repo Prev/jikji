@@ -1,21 +1,39 @@
 from setuptools import setup
 
+import re
+import ast
+
+_version_re = re.compile(r'__version__\s+=\s+(.*)')
+
+with open('jikji/__init__.py', 'rb') as f:
+	version = str(ast.literal_eval(_version_re.search(
+		f.read().decode('utf-8')).group(1)))
+
+
 setup(
 	name = 'jikji',
 	packages = ['jikji'],
-	version = '0.1.2',
-	description = 'Code-less static web generator based on RESTFul API Server',
+	version = version,
+	description = 'Static website generator based on RESTFul Server',
 	license = 'MIT',
 
 	author = 'Youngsoo Lee',
 	author_email = 'prevdev@gmail.com',
 	
 	url = 'https://github.com/Prev/jikji',
-	keywords = ['static-web', 'generator'],
+	keywords = ['jikji', 'static', 'websites' 'generator', 'jinja2'],
 
 	install_requires=[
 		'Jinja2>=2.4',
 		'requests>=2.11',
 		'py>=1.4',
 	],
+
+	classifiers=(
+		'Programming Language :: Python',
+		'Programming Language :: Python :: 3',
+		'Programming Language :: Python :: 3.3',
+		'Programming Language :: Python :: 3.4',
+		'Programming Language :: Python :: 3.5',
+	),
 )
