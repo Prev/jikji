@@ -41,23 +41,23 @@ class ConfigPath :
 
 	@property
 	def tpl(self):
-		return "%s/%s" % (self.sitepath, self._get('template'))
+		return os.path.join(self.sitepath, self._get('template'))
 	
 
 	@property
 	def output(self):
-		return "%s/%s" % (self.sitepath, self._get('output'))
+		return os.path.join(self.sitepath, self._get('output'))
 
 
 	@property
 	def assets(self):
 		asset_lists = self._get('assets')
-		return [ "%s/%s" % (self.sitepath, d) for d in asset_lists ]
+		return [ os.path.join(self.sitepath, d) for d in asset_lists ]
 
 
 	@property
 	def pages_xml(self):
-		return "%s/%s" % (self.sitepath, self._get('pages_xml'))
+		return os.path.join(self.sitepath, self._get('pages_xml'))
 
 
 class Config :

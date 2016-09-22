@@ -15,10 +15,7 @@ from . import cprint
 
 class History :
 
-	def _check_log_enabled(self) :
-		return self._config.log_history
-		
-
+	
 	def __init__(self, config) :
 		""" Init History Class with config
 		"""
@@ -35,7 +32,7 @@ class History :
 		# Get history dir of now time
 		now = datetime.now()
 		nowstr = now.strftime('%y-%m-%d %H:%M:%S.%f')
-		cur_historydir = '%s/%s' % (historydir, nowstr)
+		cur_historydir = os.path.join(historydir, nowstr)
 
 
 		if not os.path.isdir(cur_historydir) :
@@ -46,24 +43,41 @@ class History :
 
 
 
-	def log(self) :
-		""" log history
+	def _check_log_enabled(self) :
+		""" Return log_history is enabled
 		"""
+		return self._config.log_history
 
+
+
+	def log(self, filename, content) :
+		""" log file to cur_historydir
+		"""
+		if not self._check_log_enabled() : return
+
+		with open(os.path.join(self.cur_historydir, filename), 'w') as file:
+			file.write(content)
+
+
+	def log_terminal(self) :
+		""" log terminal output
+		"""
+		terminal_capture = cprint.capture()
+		self.log('terminal.log', terminal_capture)
+
+
+
+	def log_outputs(self) :
+		""" log output files
+		"""
 		if not self._check_log_enabled() : return
 		
-		# Log terminal.log
-		terminal_capture = cprint.capture()
-
-		with open('%s/terminal.log' % self.cur_historydir, 'w') as file:
-			file.write(terminal_capture)
-
-
-		# Copy output files to history
 		try :
-			shutil.copytree( self._config.path.output, '%s/%s' % (self.cur_historydir, 'output') )
+			shutil.copytree( self._config.path.output, os.path.join(self.cur_historydir, 'output') )
 		except FileExistsError:
 			pass
 
+
+	
 
 

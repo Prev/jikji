@@ -21,16 +21,20 @@ class Jikji :
 
 	def __init__(self, config_path) :
 		self._conf = Config( config_path )
+		self._history = History( self._conf )
+		self._cache = Cache(self._conf.sitepath)
+
 		self._model = Model(
 			server_info = self._conf.server_info,
-			cache = Cache(self._conf.sitepath)
+			cache = self._cache
 		)
 
 		self._generator = Generator(
 			configpath = self._conf.path,
-			model = self._model
+			model = self._model,
+			history = self._history
 		)
-		self._history = History(self._conf)
+		
 
 
 	@property
@@ -47,5 +51,3 @@ class Jikji :
 		cprint.line('Using Jikji %s ' % __version__)
 		
 		self._generator.generate()
-		self._history.log()
-
