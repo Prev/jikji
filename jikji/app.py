@@ -12,7 +12,10 @@ import os
 from .config import Config
 from .model import Model, Cache
 from .generator import Generator
+from .history import History
 
+from . import __version__
+from . import cprint
 
 class Jikji :
 
@@ -24,6 +27,7 @@ class Jikji :
 		)
 
 		self._generator = Generator(self._conf, self._model)
+		self._history = History(self._conf)
 
 
 	@property
@@ -37,5 +41,9 @@ class Jikji :
 
 
 	def generate(self) :
+		cprint.line('Using Jikji %s ' % __version__)
+		
 		self._generator.generate()
+		self._history.log()
+
 

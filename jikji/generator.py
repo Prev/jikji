@@ -53,7 +53,7 @@ class Generator :
 		self._gen_start_time = time.time()
 
 
-		cprint.bold('Start generating "%s"' % os.path.abspath(self.config.sitepath))
+		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.config.sitepath))
 
 		cprint.section('Parse pages.xml with Rest Server')
 		cprint.bold('With Rest server "%s"\n' % self.config.server_info['base_url'])

@@ -1,36 +1,41 @@
 # Jikji
-[![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi)]
+[![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi)
 [![Build Status](https://travis-ci.org/Prev/jikji.svg?branch=master)](https://travis-ci.org/Prev/jikji)  
 
 Static website generator based on RESTFul Server
 
+  
 
 ## What's different
 In common static website generator like [Jekyll](https://jekyllrb.com/),   it transform **plain text** like mardown to html.
 
-But `jikji` generate pages based on **JSON** data returned in RESTFul Server.  
-We call this JSON `model`.
+  
+
+But `jikji` generate pages based on **JSON** data returned in RESTFul Server.
 
 You can use "Rest-base Cloud Database" like [IBM Cloudant](https://cloudant.com/) as RESTFul Server, 
 so you don't need to code RESTFul server yourself.
 
 
-After getting `model`, we can access it in template like `{{ article_content }}`.
+We call the JSON data that gotten from RESTFul Server `model`.  
+After getting `model`, you can access it in template like `{{ article_content }}`.
 
 
 **Code** for getting data from `model` and generate `template` is **NOT** needed.  
 You just write some configs and templates of website, then `jikji` will create static website greatly.
 
 
+## Install
+```bash
+$ pip install jikji
+```
+
 
 ## Usage
 ```bash
-$ pip install jikji
 $ python -m jikji sample_site
 ```
-
 or
-
 ```python
 from jikji import Jikji
 jikji = Jikji('sample_site')
@@ -40,7 +45,7 @@ jikji.generate()
 
 # template engine
 `jikji` use [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
-You can see template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/)
+You can see jinja template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/).
 
 
   

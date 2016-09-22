@@ -20,10 +20,8 @@ class Cache :
 	def __init__(self, sitepath) :
 		""" Init Cache Class with sitepath
 		"""
-		cachedir = sitepath + '/.jikji/cache/'
-		os.makedirs(cachedir, exist_ok=True )
-
-		self.cachedir = cachedir
+		self.cachedir = sitepath + '/.jikji/cache/'
+		os.makedirs(self.cachedir, exist_ok=True )
 
 
 	def getpath(self, key) :
