@@ -63,16 +63,16 @@ class Model :
 	]
 
 
-	def __init__(self, rest_server_info, cache) :
+	def __init__(self, server_info, cache) :
 		""" Init Model instance
 		"""
-		self.set_baseurl( rest_server_info['base_url'] )
-		self.set_headers( rest_server_info.get('headers', None) )
+		self.set_baseurl( server_info.get('base_url', '') )
+		self.set_headers( server_info.get('headers', None) )
 		self.cache = cache
 
 
 	def set_baseurl(self, value) :
-		if value[-1] == '/' :
+		if len(value) > 0 and value[-1] == '/' :
 			value = value[0:-1]
 
 		self._baseurl = value
@@ -137,6 +137,8 @@ class Model :
 			me = ModelException(HTTPError=e)
 			cprint.error('%s' % me.status)
 			raise me
+
+		
 
 
 		if parsejson :

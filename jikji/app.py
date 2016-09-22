@@ -22,11 +22,14 @@ class Jikji :
 	def __init__(self, config_path) :
 		self._conf = Config( config_path )
 		self._model = Model(
-			rest_server_info = self._conf.server_info,
+			server_info = self._conf.server_info,
 			cache = Cache(self._conf.sitepath)
 		)
 
-		self._generator = Generator(self._conf, self._model)
+		self._generator = Generator(
+			configpath = self._conf.path,
+			model = self._model
+		)
 		self._history = History(self._conf)
 
 
@@ -45,5 +48,4 @@ class Jikji :
 		
 		self._generator.generate()
 		self._history.log()
-
 

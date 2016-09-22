@@ -15,10 +15,18 @@ from . import cprint
 
 class History :
 
-	
+	def _check_log_enabled(self) :
+		return self._config.log_history
+		
+
 	def __init__(self, config) :
 		""" Init History Class with config
 		"""
+
+		self._config = config
+
+		if not self._check_log_enabled() : return
+
 		
 		historydir = config.sitepath + '/.jikji/history'
 		os.makedirs(historydir, exist_ok=True )
@@ -33,15 +41,16 @@ class History :
 		if not os.path.isdir(cur_historydir) :
 			os.mkdir(cur_historydir)
 
-		self._config = config
 		self.historydir = historydir
 		self.cur_historydir = cur_historydir
 
 
 
 	def log(self) :
-		""" logh history
+		""" log history
 		"""
+
+		if not self._check_log_enabled() : return
 		
 		# Log terminal.log
 		terminal_capture = cprint.capture()
@@ -51,5 +60,10 @@ class History :
 
 
 		# Copy output files to history
-		shutil.copytree( self._config.path.output, '%s/%s' % (self.cur_historydir, 'output') )
+		try :
+			shutil.copytree( self._config.path.output, '%s/%s' % (self.cur_historydir, 'output') )
+		except FileExistsError:
+			pass
+
+
 

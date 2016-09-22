@@ -35,12 +35,12 @@ class Generator :
 	]
 
 
-	def __init__(self, config, model) :
+	def __init__(self, configpath, model) :
 		""" Constructor
-		:param config: jikji.config.Config instance
+		:param configpath: jikji.config.ConfigPath instance
 		"""
 
-		self.config = config
+		self.configpath = configpath
 		self.model = model
 
 
@@ -53,15 +53,15 @@ class Generator :
 		self._gen_start_time = time.time()
 
 
-		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.config.sitepath))
+		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.configpath.sitepath))
 
 		cprint.section('Parse pages.xml with Rest Server')
-		cprint.bold('With Rest server "%s"\n' % self.config.server_info['base_url'])
+		cprint.bold('With Rest server "%s"\n' % self.model.get_baseurl())
 
 
 		# render pages.xml
 		try :
-			rendered_data = self._render_pages_xml( self.config.path.pages_xml )
+			rendered_data = self._render_pages_xml( self.configpath.pages_xml )
 		
 		except ModelException as e:
 			self._finish(False, 'Model Error', e)
@@ -74,7 +74,7 @@ class Generator :
 		# parse rendered pages.xml via xml.etree.ElementTree
 		page_tags = ET.fromstring(rendered_data).findall('page')
 
-		output_dir = self.config.path.output
+		output_dir = self.configpath.output
 
 
 		cprint.line()
@@ -84,7 +84,7 @@ class Generator :
 
 		# template renderer Environment
 		env = jinja2.Environment(
-			loader=jinja2.FileSystemLoader( self.config.path.tpl )
+			loader=jinja2.FileSystemLoader( self.configpath.tpl )
 		)
 		
 
@@ -116,7 +116,7 @@ class Generator :
 			cprint.ok('%s' % trimed_path )
 
 
-		for asset_dir in self.config.path.assets :
+		for asset_dir in self.configpath.assets :
 			self._copy_asset_files(asset_dir, asset_dir, output_dir)
 
 

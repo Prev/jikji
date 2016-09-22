@@ -13,9 +13,8 @@ import tempfile
 
 
 # logging terminal output to temp file
-_log_path = tempfile.gettempdir() + '/jikji.terminal.log'
-_log_file = open(_log_path, 'w')
-
+_log_path = tempfile.gettempdir() + 'jikji.terminal.log'
+_log_file = open(_log_path, 'w+')
 
 
 _tw = TerminalWriter()
@@ -64,11 +63,10 @@ def capture() :
 	""" Read logging temp file and reset it
 	:return: terminal printed string
 	"""
-	global _log_path, _log_file
-	_log_file.close()
+	global _log_file
 
-	with open(_log_path, 'r') as file:
-		out = file.read()
+	_log_file.seek(0)
+	out = _log_file.read()
 
-	_log_file = open(_log_path, 'w')
+	_log_file.truncate()
 	return out

@@ -15,30 +15,49 @@ from . import cprint
 
 class ConfigPath :
 
+	# default datas or path
+	_defaults = {
+		'template': 'templates',
+		'output': 'output',
+		'assets': [],
+		'pages_xml': 'pages.xml'
+	}
+
+
 	def __init__(self, sitepath, data) :
-		self._sitepath = sitepath
+		""" Init ConfigPath Instance
+		"""
+		self.sitepath = sitepath
 		self._data = data
+
+
+	def _get(self, key) :
+		""" Get data form _data with default value
+		"""
+		global _defaults
+		return self._data.get(key, self._defaults[key]) # get value in dict with default value
+
 
 
 	@property
 	def tpl(self):
-		return "%s/%s" % (self._sitepath, self._data['path']['template'])
+		return "%s/%s" % (self.sitepath, self._get('template'))
 	
 
 	@property
 	def output(self):
-		return "%s/%s" % (self._sitepath, self._data['path']['output'])
+		return "%s/%s" % (self.sitepath, self._get('output'))
 
 
 	@property
 	def assets(self):
-		asset_lists = self._data['path'].get('assets', [])
-		return [ "%s/%s" % (self._sitepath, d) for d in asset_lists ]
+		asset_lists = self._get('assets')
+		return [ "%s/%s" % (self.sitepath, d) for d in asset_lists ]
 
 
 	@property
 	def pages_xml(self):
-		return "%s/%s" % (self._sitepath, self._data['pages_xml'])
+		return "%s/%s" % (self.sitepath, self._get('pages_xml'))
 
 
 class Config :
@@ -60,14 +79,28 @@ class Config :
 		config_data = config_file.read()
 
 		self._config = json.loads(config_data)
-
 		self.sitepath = os.path.dirname(config_file_path)
-		self.path = ConfigPath(self.sitepath, self._config)
-	
+
+		self._path_instance = ConfigPath(
+			sitepath = self.sitepath,
+			data = self._config.get('path', {})
+		)
+
 
 	@property
+	def path(self):
+		return self._path_instance
+	
+	
+	@property
 	def server_info(self) :
-		return self._config['rest_server']
+		return self._config.get('server_info', {})
+
+
+	@property
+	def log_history(self):
+		return self._config.get('log_history', True)
+	
 
 
 

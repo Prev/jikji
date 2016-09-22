@@ -54,7 +54,7 @@ Configure directory structure of site, and rest api server's information.
 
 ```json
 {
-	"rest_server": {
+	"server_info": {
 		"type": "cloudant",
 		"base_url": "https://rexpress.cloudant.com/",
 		"headers": {
@@ -66,9 +66,9 @@ Configure directory structure of site, and rest api server's information.
 		"output": "generated",
 		"assets": [
 			"assets"
-		]
-	},
-	"pages_xml": "pages.xml"
+		],
+		"pages_xml": "pages.xml"
+	}
 }
 ```
 
