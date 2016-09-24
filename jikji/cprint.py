@@ -9,12 +9,9 @@
 """
 
 from py.io import TerminalWriter, StdCaptureFD
-import tempfile
-
 
 # logging terminal output to temp file
-_log_path = tempfile.gettempdir() + 'jikji.terminal.log'
-_log_file = open(_log_path, 'w+')
+_log_file = open('.jikji.terminal.log', 'w+')
 
 
 _tw = TerminalWriter()
