@@ -99,7 +99,7 @@ class Config :
 
 	@property
 	def log_history(self):
-		return self._config.get('log_history', True)
+		return self._config.get('log_history', False)
 	
 
 

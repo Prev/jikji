@@ -29,8 +29,8 @@ from .model import ModelException
 class Generator :
 	
 	__attrs__ =[
-		'config', 'model',
-		'_gen_start_time'	
+		'configpath', 'model', 'history'
+		'_gen_start_time'
 	]
 
 
