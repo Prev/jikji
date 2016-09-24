@@ -26,22 +26,22 @@ from . import cprint
 from .model import ModelException
 
 
-
 class Generator :
 	
 	__attrs__ =[
-		'config', 'model',
-		'_gen_start_time'	
+		'configpath', 'model', 'history'
+		'_gen_start_time'
 	]
 
 
-	def __init__(self, config, model) :
+	def __init__(self, configpath, model, history=None) :
 		""" Constructor
-		:param config: jikji.config.Config instance
+		:param configpath: jikji.config.ConfigPath instance
 		"""
 
-		self.config = config
+		self.configpath = configpath
 		self.model = model
+		self.history = history
 
 
 
@@ -53,15 +53,15 @@ class Generator :
 		self._gen_start_time = time.time()
 
 
-		cprint.bold('Start generating "%s"' % os.path.abspath(self.config.sitepath))
+		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.configpath.sitepath))
 
 		cprint.section('Parse pages.xml with Rest Server')
-		cprint.bold('With Rest server "%s"\n' % self.config.server_info['base_url'])
+		cprint.bold('With Rest server "%s"\n' % self.model.get_baseurl())
 
 
 		# render pages.xml
 		try :
-			rendered_data = self._render_pages_xml( self.config.path.pages_xml )
+			rendered_data = self._render_pages_xml( self.configpath.pages_xml )
 		
 		except ModelException as e:
 			self._finish(False, 'Model Error', e)
@@ -74,7 +74,7 @@ class Generator :
 		# parse rendered pages.xml via xml.etree.ElementTree
 		page_tags = ET.fromstring(rendered_data).findall('page')
 
-		output_dir = self.config.path.output
+		output_dir = self.configpath.output
 
 
 		cprint.line()
@@ -84,7 +84,7 @@ class Generator :
 
 		# template renderer Environment
 		env = jinja2.Environment(
-			loader=jinja2.FileSystemLoader( self.config.path.tpl )
+			loader=jinja2.FileSystemLoader( self.configpath.tpl )
 		)
 		
 
@@ -116,7 +116,7 @@ class Generator :
 			cprint.ok('%s' % trimed_path )
 
 
-		for asset_dir in self.config.path.assets :
+		for asset_dir in self.configpath.assets :
 			self._copy_asset_files(asset_dir, asset_dir, output_dir)
 
 
@@ -127,7 +127,11 @@ class Generator :
 	def _finish(self, is_success, err_cause=None, err_instance=None) :
 		if is_success :
 			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), **{'blue':True})
-		
+			
+			if self.history :
+				self.history.log_terminal()
+				self.history.log_outputs()
+
 		else :
 			cprint.section()
 			
@@ -141,6 +145,10 @@ class Generator :
 				traceback.print_exc()
 
 			cprint.section('Generation Stopped by ' + err_cause , **{'red':True})
+
+
+			if self.history :
+				self.history.log_terminal()
 			sys.exit(-1)
 
 		
@@ -160,6 +168,9 @@ class Generator :
 			'model': self.model,
 			'time': time
 		})
+
+		if self.history :
+			self.history.log('pages.xml', rendered_xml)
 
 		return rendered_xml
 
@@ -204,15 +215,15 @@ class Generator :
 				# continue if file is hidden
 				continue
 
-			filepath = "%s/%s" % (dir, file)
+			filepath = os.path.join(dir, file)
 
 			if os.path.isdir(filepath) :
 				self._copy_asset_files(filepath, asset_dir, output_dir)
 
 			else :
 				# filepath that common string of asset_dir is removed
-				trimed_path = filepath[ len(asset_dir) : ] 
-				dst_path = "%s%s" % (output_dir, trimed_path)
+				trimed_path = filepath[ len(asset_dir)+1 : ] 
+				dst_path = os.path.join(output_dir, trimed_path)
 
 				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
 				shutil.copyfile(
@@ -220,6 +231,6 @@ class Generator :
 					dst = dst_path
 				)
 
-				cprint.line('%s [Asset]' % trimed_path)
+				cprint.line('/%s [Asset]' % trimed_path)
 
 

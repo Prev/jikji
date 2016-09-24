@@ -8,9 +8,14 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-from py.io import TerminalWriter
+from py.io import TerminalWriter, StdCaptureFD
+
+# logging terminal output to temp file
+_log_file = open('.jikji.terminal.log', 'w+')
+
 
 _tw = TerminalWriter()
+_lw = TerminalWriter(file=_log_file) # log writer
 
 
 def ok(msg) :
@@ -31,16 +36,34 @@ def error(msg) :
 def bold(msg) :
 	line(msg, **{'bold': True})
 
+
 def write(msg, **markup) :
-	_tw.write(msg, **markup)
+	for w in (_tw, _lw) :
+		w.write(msg, **markup)
+	
 
 def line(msg='', **markup) :
-	msg = str(msg)
-	_tw.line(msg, **markup)
+	for w in (_tw, _lw) :
+		w.line(str(msg), **markup)
 
 def sep(sep, title, **markup) :
-	_tw.sep(sep, title, **markup)
+	for w in (_tw, _lw) :
+		w.sep(sep, title, **markup)
+	
 
 def section(title=None, **markup) :
-	_tw.sep('-', title, **markup)
+	sep('-', title, **markup)
 
+
+
+def capture() :
+	""" Read logging temp file and reset it
+	:return: terminal printed string
+	"""
+	global _log_file
+
+	_log_file.seek(0)
+	out = _log_file.read()
+
+	_log_file.truncate()
+	return out

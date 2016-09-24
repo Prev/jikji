@@ -1,5 +1,5 @@
 {
-	"rest_server": {
+	"server_info": {
 		"type": "cloudant",
 		"base_url": "https://rexpress.cloudant.com/",
 		"headers": {
@@ -12,8 +12,9 @@
 		"output": "generated",
 		"assets": [
 			"assets"
-		]
+		],
+		"pages_xml": "pages.xml"
 	},
 
-	"pages_xml": "pages.xml"
+	"log_history": true
 }

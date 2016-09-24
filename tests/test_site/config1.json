@@ -1,12 +1,12 @@
 {
-	"rest_server": {
+	"server_info": {
 		"base_url": "http://echo.jsontest.com"
 	},
 
 	"path": {
 		"template": "templates",
-		"output": "generated/1"
+		"output": "generated/1",
+		"pages_xml": "pages1.xml"
 	},
-
-	"pages_xml": "pages1.xml"
+	"log_history": false
 }
