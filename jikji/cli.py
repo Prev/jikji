@@ -13,6 +13,7 @@ import click
 
 from .app import Jikji
 from .cprint import cprint
+from .listener import Listener
 
 
 cli_help = """\
@@ -40,8 +41,9 @@ def cli(ctx, sitepath) :
 
 """
 Command for generate
+Usage:
+	jikji <sitepath> generate
 
-jikji <sitepath> generate
 """
 @cli.command('generate', short_help="Generate static site")
 @click.pass_context
@@ -56,8 +58,9 @@ def generate_command(ctx) :
 
 """
 Command for cache
+Usage:
+	jikji <sitepath> cache <command> [--Args] [--Options]
 
-jikji <sitepath> cache <command> [--Args] [--Options]
 """
 @cli.group('cache', help="Manage Cache")
 def cache() :
@@ -87,6 +90,29 @@ def cache_remove_command(ctx, key, regex) :
 	app.cache.remove(key, as_pattern=regex)
 
 
+
+"""
+Open listening server for develop
+Usage:
+	jikji <sitepath> listen
+
+"""
+@cli.command('listen')
+@click.option('--host', '-h', default='0.0.0.0')
+@click.option('--port', '-p', default=7000)
+@click.pass_context
+def listen_command(ctx, host, port) :
+	""" Generate static site
+	"""
+	app = ctx.obj['APP']
+
+	cprint.section('Rendering pages.xml')
+	pages = app.generator.render_pages_xml( app.config.path.pages_xml )
+	
+
+	cprint.section('Open Local Server with Flask')
+	listener = Listener(app=app, pages=pages)
+	listener.listen(host=host, port=port)
 
 
 

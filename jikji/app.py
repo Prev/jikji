@@ -49,8 +49,14 @@ class Jikji :
 	def cache(self) :
 		return self._cache
 
+	@property
+	def generator(self) :
+		return self._generator
+
 
 	def generate(self) :
+		""" Generate static website
+		"""
 		cprint.line('Using Jikji %s ' % __version__)
 		
 		self._generator.generate()

@@ -34,7 +34,6 @@ class Generator :
 		'_gen_start_time'
 	]
 
-
 	def __init__(self, config, model) :
 		""" Constructor
 		:param configpath: jikji.config.Config instance
@@ -44,11 +43,12 @@ class Generator :
 		self.config = config
 		self.configpath = config.path
 		self.model = model
+		self.history = None
 
 
 	def generate(self) :
 		""" Generate pages
-		Read pages.xml, render with jinja2, parse rendered file, and create static web pages.
+			Read pages.xml, render with jinja2, parse rendered file, and create static web pages.
 		"""
 
 		self.history = History(self.config)
@@ -63,7 +63,7 @@ class Generator :
 
 		# render pages.xml
 		try :
-			rendered_data = self._render_pages_xml( self.configpath.pages_xml )
+			pages = self.render_pages_xml( self.configpath.pages_xml )
 		
 		except ModelException as e:
 			self._finish(False, 'Model Error', e)
@@ -73,28 +73,23 @@ class Generator :
 
 
 
-		# parse rendered pages.xml via xml.etree.ElementTree
-		page_tags = ET.fromstring(rendered_data).findall('page')
 
 		output_dir = self.configpath.output
 
 
 		cprint.line()
-		cprint.section('Rendering %d pages' % len(page_tags))
+		cprint.section('Rendering %d pages' % len(pages))
 		cprint.bold('Output in "%s"\n' % output_dir)
 
 
 		# template renderer Environment
-		env = jinja2.Environment(
-			loader=jinja2.FileSystemLoader( self.configpath.tpl )
-		)
-		
+		env = jinja2.Environment( loader=jinja2.FileSystemLoader( self.configpath.tpl ) )
 
-		for page in page_tags :
-			template = env.get_template( page.find('template').text.strip() )
+		for page in pages :
+			template = env.get_template( page['template'] )
 
 			path = self._get_output_file_path(
-				url = page.find('url').text.strip(),
+				url = page['url'],
 				output_dir = output_dir
 			)
 
@@ -106,7 +101,7 @@ class Generator :
 				#  because in pages xml, context value is not printed with json.dumps
 				self._generate_page(
 					output_file = path,
-					context = ast.literal_eval( page.find('context').text.strip() ),
+					context = page['context'],
 					template = template,
 				)
 			
@@ -164,11 +159,11 @@ class Generator :
 
 		
 
-	def _render_pages_xml(self, pages_xml_path) :
+	def render_pages_xml(self, pages_xml_path) :
 		""" Render pages.xml via jinja
 
 		:param pages_xml_path: string
-		:return string
+		:return array of pages data
 		"""
 		with open(pages_xml_path, 'r') as file:
 			pages_config_content = file.read()
@@ -180,9 +175,22 @@ class Generator :
 			'time': time
 		})
 
-		self.history.log('pages.xml', rendered_xml)
+		if self.history :
+			self.history.log('pages.xml', rendered_xml)
 
-		return rendered_xml
+
+		# parse rendered pages.xml via xml.etree.ElementTree
+		page_tags = ET.fromstring(rendered_xml).findall('page')
+		pages = []
+
+		for page in page_tags :
+			pages.append({
+				'template': page.find('template').text.strip(),
+				'url':		page.find('url').text.strip(),
+				'context':	ast.literal_eval( page.find('context').text.strip() )
+			})
+
+		return pages
 
 
 	def _get_output_file_path(self, url, output_dir) :
