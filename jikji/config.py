@@ -10,12 +10,14 @@
 import os
 import sys
 import json
-from . import cprint
+from .cprint import cprint
 
 
 class ConfigPath :
+	""" ConfigPath Object
+		'path' property in config.json data
+	"""
 
-	# default datas or path
 	_defaults = {
 		'template': 'templates',
 		'output': 'output',
@@ -38,7 +40,6 @@ class ConfigPath :
 		return self._data.get(key, self._defaults[key]) # get value in dict with default value
 
 
-
 	@property
 	def tpl(self):
 		return os.path.join(self.sitepath, self._get('template'))
@@ -58,6 +59,7 @@ class ConfigPath :
 	@property
 	def pages_xml(self):
 		return os.path.join(self.sitepath, self._get('pages_xml'))
+
 
 
 class Config :

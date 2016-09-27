@@ -2,68 +2,103 @@
 
 """
 	jikji/cprint
-	----------------
-	print with color
+	------------------------------
+	Print with color
+	Capture terminal log to file
 	
 	:author Prev(prevdev@gmail.com)
 """
 
 from py.io import TerminalWriter, StdCaptureFD
 
-# logging terminal output to temp file
-_log_file = open('.jikji.terminal.log', 'w+')
+class cprint() :
+
+	# Default Terminal Writer on 'py.std.sys.stdout'
+	_tw = TerminalWriter()
 
 
-_tw = TerminalWriter()
-_lw = TerminalWriter(file=_log_file) # log writer
+	# Log Writer
+	_lw = None
+	_logfile = None
 
 
-def ok(msg) :
-	line(msg, **{'green': True})
+	def writers() :
+		""" Return writers that be written
+		"""
+		if cprint._lw is not None :
+			return (cprint._tw, cprint._lw)
+		else :
+			return (cprint._tw, )
 
-def okb(msg) :
-	line(msg, **{'blue': True})
 
-def warn(msg) :
-	line(msg, **{'yellow': True})
+	@staticmethod
+	def capture_file(logfile_path) :
+		""" Logging terminal output to logfile
+		"""
+		cprint._logfile = open(logfile_path, 'w+')
+		cprint._lw = TerminalWriter(file=cprint._logfile) # log writer
 
-def fail(msg) :
-	line(msg, **{'red': True})
+
+	@staticmethod
+	def end_capture_file() :
+		""" End logging terminal output to logfile
+		"""
+		if cprint._logfile is not None :
+			cprint._logfile.close()
+		cprint._lw = None
+
+
+	@staticmethod
+	def ok(msg) :
+		cprint.line(msg, **{'green': True})
+
+
+	@staticmethod
+	def okb(msg) :
+		cprint.line(msg, **{'blue': True})
+
+
+	@staticmethod
+	def warn(msg) :
+		cprint.line(msg, **{'yellow': True})
+
+
+	@staticmethod
+	def fail(msg) :
+		cprint.line(msg, **{'red': True})
 	
-def error(msg) :
-	fail(msg)
 
-def bold(msg) :
-	line(msg, **{'bold': True})
+	@staticmethod
+	def error(msg) :
+		cprint.fail(msg)
 
 
-def write(msg, **markup) :
-	for w in (_tw, _lw) :
-		w.write(msg, **markup)
+	@staticmethod
+	def bold(msg) :
+		cprint.line(msg, **{'bold': True})
+
+
+	@staticmethod
+	def write(msg, **markup) :
+		for w in cprint.writers() :
+			w.write(msg, **markup)
+		
+
+	@staticmethod
+	def line(msg='', **markup) :
+		for w in cprint.writers() :
+			w.line(str(msg), **markup)
+
+
+	@staticmethod
+	def sep(sep, title, **markup) :
+		for w in cprint.writers() :
+			w.sep(sep, title, **markup)
+		
+
+	@staticmethod
+	def section(title=None, **markup) :
+		cprint.sep('-', title, **markup)
+
+
 	
-
-def line(msg='', **markup) :
-	for w in (_tw, _lw) :
-		w.line(str(msg), **markup)
-
-def sep(sep, title, **markup) :
-	for w in (_tw, _lw) :
-		w.sep(sep, title, **markup)
-	
-
-def section(title=None, **markup) :
-	sep('-', title, **markup)
-
-
-
-def capture() :
-	""" Read logging temp file and reset it
-	:return: terminal printed string
-	"""
-	global _log_file
-
-	_log_file.seek(0)
-	out = _log_file.read()
-
-	_log_file.truncate()
-	return out

@@ -100,10 +100,10 @@ After getting data in RESTFul Server, you can make **page tag** with model data 
 		<context>{{ all_docs }}</context>
 		<template>home.html</template>
 	</page>
-	{% for row in all_docs['rows'] %}
+	{% for row in all_docs.rows %}
 	<page>
-		<url>/doc/{{ row['id'] }}/</url>
-		<context>{{ model.get('/test/' + row['id']) }}</context>
+		<url>/doc/{{ row.id }}/</url>
+		<context>{{ model.get('/test/' + row.id) }}</context>
 		<template>document.html</template>
 	</page>
 	{% endfor %}

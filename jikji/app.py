@@ -12,16 +12,14 @@ import os
 from .config import Config
 from .model import Model, Cache
 from .generator import Generator
-from .history import History
+from .cprint import cprint
 
 from . import __version__
-from . import cprint
 
 class Jikji :
 
 	def __init__(self, config_path) :
 		self._conf = Config( config_path )
-		self._history = History( self._conf )
 		self._cache = Cache(self._conf.sitepath)
 
 		self._model = Model(
@@ -30,9 +28,8 @@ class Jikji :
 		)
 
 		self._generator = Generator(
-			configpath = self._conf.path,
-			model = self._model,
-			history = self._history
+			config = self._conf,
+			model = self._model
 		)
 		
 

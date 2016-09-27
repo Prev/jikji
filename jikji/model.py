@@ -12,7 +12,8 @@ import requests
 import base64
 import json
 import os
-from . import cprint
+
+from .cprint import cprint
 
 
 class Cache :
@@ -20,14 +21,15 @@ class Cache :
 	def __init__(self, sitepath) :
 		""" Init Cache Class with sitepath
 		"""
-		self.cachedir = sitepath + '/.jikji/cache/'
+		
+		self.cachedir = os.path.join(sitepath, '.jikji', 'cache')
 		os.makedirs(self.cachedir, exist_ok=True )
 
 
 	def getpath(self, key) :
 		""" Get cache file path of key
 		"""
-		return self.cachedir + quote_plus(key)
+		return os.path.join(self.cachedir, quote_plus(key))
 
 
 	def get(self, key, default=None) :

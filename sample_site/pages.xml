@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <site>
-	{% set all_docs = model.get('/test/_all_docs') %}
-	{# set meta = model.post(
-		api = '/test',
-		data = {
-			'type': 'temp',
-			'created': time.strftime('%Y-%m-%d %H:%M:%S')
-		}
-	) #}
-
+	{% set all_docs = model.get('/test/_design/share-view/_view/share-list') %}
 
 	<page>
 		<url>/</url>
@@ -17,13 +9,13 @@
 	</page>
 
 
-	{% for row in all_docs['rows'] %}
+	{% for row in all_docs.rows %}
 	<page>
-		<url>/doc/{{ row['id'] }}/</url>
+		<url>/doc/{{ row.id }}/</url>
 		<context>
 			{{
 				model.get(
-					api = '/test/' + row['id'],
+					api = '/test/' + row.id,
 					immutable = True
 				)
 			}}
