@@ -15,14 +15,15 @@ from .app import Jikji
 from .cprint import cprint
 
 
-cli_help = """
+cli_help = """\
+\b
 Static website generator based on RESTFul Server *~*
-
 You can read guide from https://github.com/Prev/jikji
 
+\b 
 Example Usage:
-
    $ jikji <mysite> generate
+   $ jikji <mysite> cache list
 
 """
 
@@ -33,37 +34,57 @@ Example Usage:
 @click.pass_context
 def cli(ctx, sitepath) :
 	ctx.obj['SITEPATH'] = sitepath
+	ctx.obj['APP'] = Jikji( sitepath )
 
 
 
+"""
+Command for generate
+
+jikji <sitepath> generate
+"""
 @cli.command('generate', short_help="Generate static site")
 @click.pass_context
 def generate_command(ctx) :
 	""" Generate static site
 	"""
-	app = Jikji( ctx.obj['SITEPATH'] )
+	app = ctx.obj['APP']
 	app.generate()
 
 
 
 
-@cli.command('clear')
-@click.option('--cache', '-c', is_flag=True, default=False)
-@click.option('--history', '-h', is_flag=True, default=False)
+"""
+Command for cache
+
+jikji <sitepath> cache <command> [--Args] [--Options]
+"""
+@cli.group('cache', help="Manage Cache")
+def cache() :
+	pass
+
+@cache.command('list', short_help="Listing caches")
 @click.pass_context
-def clear_command(ctx, cache, history) :
-	""" Clear cache or history created by jikji
-	"""
+def cache_list_command(ctx) :
+	app = ctx.obj['APP']
 
-	if cache:
-		print('Clear cache')
+	for file in app.cache.list(details=True) :
+		print(file)
 
-	elif history:
-		print('Clear history')
 
-	else :
-		print(ctx.get_help())
+@cache.command('clear', short_help="Remove all cache files")
+@click.pass_context
+def cache_clear_command(ctx) :
+	app = ctx.obj['APP']
+	app.cache.remove_all()
 
+@cache.command('remove', short_help="Remove cache file matched")
+@click.argument('key', metavar='<key>')
+@click.option('--regex', '-r', is_flag=True, default=False, help="Using regex match instead of string equal")
+@click.pass_context
+def cache_remove_command(ctx, key, regex) :
+	app = ctx.obj['APP']
+	app.cache.remove(key, as_pattern=regex)
 
 
 

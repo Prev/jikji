@@ -10,8 +10,9 @@
 import os
 
 from .config import Config
-from .model import Model, Cache
+from .model import Model
 from .generator import Generator
+from .utils import Cache
 from .cprint import cprint
 
 from . import __version__
@@ -42,6 +43,11 @@ class Jikji :
 	@property
 	def model(self) :
 		return self._model
+
+
+	@property
+	def cache(self) :
+		return self._cache
 
 
 	def generate(self) :

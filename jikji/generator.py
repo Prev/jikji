@@ -23,7 +23,7 @@ import traceback
 import shutil
 
 from .cprint import cprint
-from .history import History
+from .utils import History
 from .model import ModelException
 
 
