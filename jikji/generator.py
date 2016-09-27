@@ -139,7 +139,7 @@ class Generator :
 		"""
 
 		if is_success :
-			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), **{'blue':True})
+			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), blue=True)
 			
 			self.history.log_generated_files()
 			self.history.close()
@@ -157,7 +157,7 @@ class Generator :
 			else :
 				traceback.print_exc()
 
-			cprint.section('Generation Stopped by ' + err_cause , **{'red':True})
+			cprint.section('Generation Stopped by ' + err_cause , red=True)
 			self.history.close()
 
 			sys.exit(-1)
