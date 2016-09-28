@@ -41,12 +41,15 @@ class Listener :
 
 		flaskapp.add_url_rule('/', 'index', self.response)
 		flaskapp.add_url_rule('/<path:url>', 'response', self.response)
-		flaskapp.run(port=port, host=host)
+		flaskapp.run(port=port, host=host, debug=True)
 
 
 	def format_url(self, url) :
 		""" Format url to check equals
 		"""
+		if len(url) >= 10 and url[-10:] == 'index.html' :
+			url = url[:-10]
+
 		if len(url) >= 1 and url[0] == '/' :
 			url = url[1:]
 		if len(url) > 1 and url[-1] == '/' :
