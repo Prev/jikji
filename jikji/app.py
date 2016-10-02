@@ -32,8 +32,6 @@ class Jikji :
 			config = self._conf,
 			model = self._model
 		)
-		
-
 
 	@property
 	def config(self) :
@@ -60,3 +58,5 @@ class Jikji :
 		cprint.line('Using Jikji %s ' % __version__)
 		
 		self._generator.generate()
+
+

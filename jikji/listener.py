@@ -30,6 +30,8 @@ class Listener :
 			url = self.format_url( page['url'] )
 			npages[url] = ( page['template'], page['context'] )
 
+			print('/' + url)
+
 		self.pages = npages
 
 
@@ -41,7 +43,7 @@ class Listener :
 
 		flaskapp.add_url_rule('/', 'index', self.response)
 		flaskapp.add_url_rule('/<path:url>', 'response', self.response)
-		flaskapp.run(port=port, host=host, debug=True)
+		flaskapp.run(port=port, host=host)
 
 
 	def format_url(self, url) :

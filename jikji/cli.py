@@ -91,6 +91,7 @@ def cache_remove_command(ctx, key, regex) :
 
 
 
+
 """
 Open listening server for develop
 Usage:
@@ -109,9 +110,10 @@ def listen_command(ctx, host, port) :
 	cprint.section('Rendering pages.xml')
 	pages = app.generator.render_pages_xml( app.config.path.pages_xml )
 	
+	cprint.section('%s pages are opened' % len(pages))
+	listener = Listener(app=app, pages=pages)
 
 	cprint.section('Open Local Server with Flask')
-	listener = Listener(app=app, pages=pages)
 	listener.listen(host=host, port=port)
 
 
