@@ -50,22 +50,22 @@ class cprint() :
 
 	@staticmethod
 	def ok(msg) :
-		cprint.line(msg, **{'green': True})
+		cprint.line(msg, green=True)
 
 
 	@staticmethod
 	def okb(msg) :
-		cprint.line(msg, **{'blue': True})
+		cprint.line(msg, blue=True)
 
 
 	@staticmethod
 	def warn(msg) :
-		cprint.line(msg, **{'yellow': True})
+		cprint.line(msg, yellow=True)
 
 
 	@staticmethod
 	def fail(msg) :
-		cprint.line(msg, **{'red': True})
+		cprint.line(msg, red=True)
 	
 
 	@staticmethod
@@ -75,7 +75,7 @@ class cprint() :
 
 	@staticmethod
 	def bold(msg) :
-		cprint.line(msg, **{'bold': True})
+		cprint.line(msg, bold=True)
 
 
 	@staticmethod

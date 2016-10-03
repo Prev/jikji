@@ -25,6 +25,8 @@ setup(
 
 	install_requires=[
 		'Jinja2>=2.4',
+		'click>=5.0',
+		'Flask>=0.10',
 		'requests>=2.11',
 		'py>=1.4',
 	],
@@ -36,4 +38,10 @@ setup(
 		'Programming Language :: Python :: 3.4',
 		'Programming Language :: Python :: 3.5',
 	),
+
+	entry_points={
+		'console_scripts': [
+			'jikji = jikji.cli:main',
+		],
+	},
 )

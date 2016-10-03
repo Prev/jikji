@@ -33,7 +33,7 @@ $ pip install jikji
 
 ## Usage
 ```bash
-$ python -m jikji sample_site
+jikji sample_site generate
 ```
 or
 ```python

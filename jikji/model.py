@@ -7,55 +7,12 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-from urllib.parse import quote_plus
 import requests
 import base64
 import json
 import os
 
 from .cprint import cprint
-
-
-class Cache :
-
-	def __init__(self, sitepath) :
-		""" Init Cache Class with sitepath
-		"""
-		
-		self.cachedir = os.path.join(sitepath, '.jikji', 'cache')
-		os.makedirs(self.cachedir, exist_ok=True )
-
-
-	def getpath(self, key) :
-		""" Get cache file path of key
-		"""
-		return os.path.join(self.cachedir, quote_plus(key))
-
-
-	def get(self, key, default=None) :
-		""" Get cached data with key
-		If cache not found, return default value of param (default: None)
-		"""
-		path = self.getpath(key)
-		
-		if os.path.isfile(path) :
-			with open(path, 'r') as file:
-				content = file.read()
-
-			return json.loads(content)
-
-		else :
-			return default
-
-
-	def set(self, key, value) :
-		""" Set cache data with key, value
-		"""
-		path = self.getpath(key)
-		
-		with open(path, 'w') as file:
-			file.write( json.dumps(value) )
-
 
 
 class Model :

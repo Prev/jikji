@@ -17,15 +17,16 @@ import ast
 import os
 import sys
 import time
+import json
 import jinja2
 import xml.etree.ElementTree as ET
 import traceback
 import shutil
 
 from .cprint import cprint
-from .history import History
+from .utils import History
 from .model import ModelException
-
+from . import functions
 
 class Generator :
 	
@@ -33,7 +34,6 @@ class Generator :
 		'config', 'configpath', 'model', 'history'
 		'_gen_start_time'
 	]
-
 
 	def __init__(self, config, model) :
 		""" Constructor
@@ -44,11 +44,12 @@ class Generator :
 		self.config = config
 		self.configpath = config.path
 		self.model = model
+		self.history = None
 
 
 	def generate(self) :
 		""" Generate pages
-		Read pages.xml, render with jinja2, parse rendered file, and create static web pages.
+			Read pages.xml, render with jinja2, parse rendered file, and create static web pages.
 		"""
 
 		self.history = History(self.config)
@@ -63,7 +64,7 @@ class Generator :
 
 		# render pages.xml
 		try :
-			rendered_data = self._render_pages_xml( self.configpath.pages_xml )
+			pages = self.render_pages_xml( self.configpath.pages_xml )
 		
 		except ModelException as e:
 			self._finish(False, 'Model Error', e)
@@ -73,28 +74,23 @@ class Generator :
 
 
 
-		# parse rendered pages.xml via xml.etree.ElementTree
-		page_tags = ET.fromstring(rendered_data).findall('page')
 
 		output_dir = self.configpath.output
 
 
 		cprint.line()
-		cprint.section('Rendering %d pages' % len(page_tags))
+		cprint.section('Rendering %d pages' % len(pages))
 		cprint.bold('Output in "%s"\n' % output_dir)
 
 
 		# template renderer Environment
-		env = jinja2.Environment(
-			loader=jinja2.FileSystemLoader( self.configpath.tpl )
-		)
-		
+		env = jinja2.Environment( loader=jinja2.FileSystemLoader( self.configpath.tpl ) )
 
-		for page in page_tags :
-			template = env.get_template( page.find('template').text.strip() )
+		for page in pages :
+			template = env.get_template( page['template'] )
 
 			path = self._get_output_file_path(
-				url = page.find('url').text.strip(),
+				url = page['url'],
 				output_dir = output_dir
 			)
 
@@ -106,7 +102,7 @@ class Generator :
 				#  because in pages xml, context value is not printed with json.dumps
 				self._generate_page(
 					output_file = path,
-					context = ast.literal_eval( page.find('context').text.strip() ),
+					context = page['context'],
 					template = template,
 				)
 			
@@ -139,7 +135,7 @@ class Generator :
 		"""
 
 		if is_success :
-			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), **{'blue':True})
+			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), blue=True)
 			
 			self.history.log_generated_files()
 			self.history.close()
@@ -157,32 +153,69 @@ class Generator :
 			else :
 				traceback.print_exc()
 
-			cprint.section('Generation Stopped by ' + err_cause , **{'red':True})
+			cprint.section('Generation Stopped by ' + err_cause , red=True)
 			self.history.close()
 
 			sys.exit(-1)
 
 		
 
-	def _render_pages_xml(self, pages_xml_path) :
+	def render_pages_xml(self, pages_xml_path) :
 		""" Render pages.xml via jinja
 
 		:param pages_xml_path: string
-		:return string
+		:return array of pages data
 		"""
 		with open(pages_xml_path, 'r') as file:
 			pages_config_content = file.read()
 
-
+		
 		tpl = jinja2.Template(pages_config_content)
-		rendered_xml = tpl.render({
+		context = {
 			'model': self.model,
-			'time': time
-		})
+			'time': time,
+			'json': json
+		}
+		
+		# Put functions to context
+		for name, cls in functions.__dict__.items() :
+			context[name] = cls
 
-		self.history.log('pages.xml', rendered_xml)
 
-		return rendered_xml
+		rendered_xml = tpl.render(context)
+
+		if self.history :
+			self.history.log('pages.xml', rendered_xml)
+
+
+		# parse rendered pages.xml via xml.etree.ElementTree
+		page_tags = ET.fromstring(rendered_xml).findall('page')
+		pages = []
+
+
+		for page in page_tags :
+			# parse context
+			ctx_txt = page.find('context').text.strip()
+
+			if page.find('context').attrib.get('type') == 'json' :
+				ctx_dict = json.loads( ctx_txt )
+
+			else :
+				try :
+					ctx_dict = ast.literal_eval( ctx_txt )
+				except ValueError as e :
+					cprint.warn(ctx_txt)
+					self._finish(False, 'ValueError occurs while parse context in pages.xml', e)
+
+
+			# append page data
+			pages.append({
+				'template': page.find('template').text.strip(),
+				'url':		page.find('url').text.strip(),
+				'context':	ctx_dict
+			})
+
+		return pages
 
 
 	def _get_output_file_path(self, url, output_dir) :

@@ -2,13 +2,13 @@
 """
 	Jikji
 	----------------
-	Code-less static web generator based on RESTful API Server
+	Static website generator based on RESTFul Server
 	
 	:author: Prev(prevdev@gmail.com)
 	:license: MIT
 
 """
 
-__version__ = '0.2.2'
+__version__ = '0.3.0'
 
 from jikji.app import Jikji

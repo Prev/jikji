@@ -10,8 +10,9 @@
 import os
 
 from .config import Config
-from .model import Model, Cache
+from .model import Model
 from .generator import Generator
+from .utils import Cache
 from .cprint import cprint
 
 from . import __version__
@@ -31,8 +32,6 @@ class Jikji :
 			config = self._conf,
 			model = self._model
 		)
-		
-
 
 	@property
 	def config(self) :
@@ -44,7 +43,20 @@ class Jikji :
 		return self._model
 
 
+	@property
+	def cache(self) :
+		return self._cache
+
+	@property
+	def generator(self) :
+		return self._generator
+
+
 	def generate(self) :
+		""" Generate static website
+		"""
 		cprint.line('Using Jikji %s ' % __version__)
 		
 		self._generator.generate()
+
+

@@ -9,7 +9,6 @@
 	"path": {
 		"template": "templates",
 		"output": "generated/2",
-		"assets": ["assets"],
 		"pages_xml": "pages2.xml"
 	}
 }
