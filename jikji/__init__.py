@@ -9,6 +9,6 @@
 
 """
 
-__version__ = '0.3-dev'
+__version__ = '0.3.0'
 
 from jikji.app import Jikji
