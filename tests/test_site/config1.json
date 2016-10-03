@@ -6,7 +6,8 @@
 	"path": {
 		"template": "templates",
 		"output": "generated/1",
-		"pages_xml": "pages1.xml"
+		"pages_xml": "pages1.xml",
+		"assets": ["assets"]
 	},
 	"log_history": false
 }

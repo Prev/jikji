@@ -18,19 +18,19 @@ from urllib.parse import quote_plus, unquote_plus
 from .cprint import cprint
 
 
-class DataUtil :
+class AppDataUtil :
 	def __init__(self, sitepath) :
 		self.datapath = os.path.join(sitepath, '.jikji')
 
 
 
-class Cache(DataUtil) :
+class Cache(AppDataUtil) :
 
 	def __init__(self, sitepath) :
 		""" Init Cache Class with sitepath
 		"""
 
-		DataUtil.__init__(self, sitepath)
+		AppDataUtil.__init__(self, sitepath)
 		
 		self.cachedir = os.path.join(self.datapath, 'cache')
 		os.makedirs(self.cachedir, exist_ok=True )
@@ -129,13 +129,13 @@ class Cache(DataUtil) :
 
 
 
-class History(DataUtil) :
+class History(AppDataUtil) :
 
 	def __init__(self, config) :
 		""" Init History Class with config
 		"""
 
-		DataUtil.__init__(self, config.sitepath)
+		AppDataUtil.__init__(self, config.sitepath)
 
 		self._config = config
 		if not self.log_enabled : return
@@ -197,5 +197,6 @@ class History(DataUtil) :
 		""" Close opened files
 		"""
 		cprint.end_capture_file()
+
 
 

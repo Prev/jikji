@@ -17,6 +17,7 @@ import ast
 import os
 import sys
 import time
+import json
 import jinja2
 import xml.etree.ElementTree as ET
 import traceback
@@ -25,7 +26,7 @@ import shutil
 from .cprint import cprint
 from .utils import History
 from .model import ModelException
-
+from . import functions
 
 class Generator :
 	
@@ -168,12 +169,20 @@ class Generator :
 		with open(pages_xml_path, 'r') as file:
 			pages_config_content = file.read()
 
-
+		
 		tpl = jinja2.Template(pages_config_content)
-		rendered_xml = tpl.render({
+		context = {
 			'model': self.model,
-			'time': time
-		})
+			'time': time,
+			'json': json
+		}
+		
+		# Put functions to context
+		for name, cls in functions.__dict__.items() :
+			context[name] = cls
+
+
+		rendered_xml = tpl.render(context)
 
 		if self.history :
 			self.history.log('pages.xml', rendered_xml)
@@ -183,11 +192,27 @@ class Generator :
 		page_tags = ET.fromstring(rendered_xml).findall('page')
 		pages = []
 
+
 		for page in page_tags :
+			# parse context
+			ctx_txt = page.find('context').text.strip()
+
+			if page.find('context').attrib.get('type') == 'json' :
+				ctx_dict = json.loads( ctx_txt )
+
+			else :
+				try :
+					ctx_dict = ast.literal_eval( ctx_txt )
+				except ValueError as e :
+					cprint.warn(ctx_txt)
+					self._finish(False, 'ValueError occurs while parse context in pages.xml', e)
+
+
+			# append page data
 			pages.append({
 				'template': page.find('template').text.strip(),
 				'url':		page.find('url').text.strip(),
-				'context':	ast.literal_eval( page.find('context').text.strip() )
+				'context':	ctx_dict
 			})
 
 		return pages
