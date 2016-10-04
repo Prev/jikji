@@ -17,10 +17,6 @@ def group(array, *args) :
 	:param array: json parsed array
 	:param **kwarg: gruoping properties
 	"""
-
-	# for data in array :
-	#print(array)
-
 	result = OrderedDict()
 
 	for data in array :
@@ -43,3 +39,19 @@ def group(array, *args) :
 		cur.append(data)
 
 	return result
+
+
+
+def strftime(timestamp, format) :
+	""" Format timestamp to string
+
+	:param timestamp: timestamp int (if timestamp is larger than 10^12, divide by 1000)
+	:param format: format param put in date.stftime
+	"""
+	from datetime import date
+
+	if timestamp >= pow(10, 12) :
+		timestamp = timestamp / 1000.0
+
+	d = date.fromtimestamp(timestamp)
+	return d.strftime(format)

@@ -107,13 +107,7 @@ def listen_command(ctx, host, port) :
 	"""
 	app = ctx.obj['APP']
 
-	cprint.section('Rendering pages.xml')
-	pages = app.generator.render_pages_xml( app.config.path.pages_xml )
-	
-	cprint.section('%s pages are opened' % len(pages))
-	listener = Listener(app=app, pages=pages)
-
-	cprint.section('Open Local Server with Flask')
+	listener = Listener(app)
 	listener.listen(host=host, port=port)
 
 

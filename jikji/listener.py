@@ -13,15 +13,25 @@ import mimetypes
 import flask
 import jinja2
 
+from .cprint import cprint
+
 class Listener :
 
-	def __init__(self, app, pages) :
+	def __init__(self, app) :
 		""" Init Listener instance
 		:param app: Jikji app istance
 		:param pages: array of page info returned from generator:render_pages_xml
 		"""
 		self.app = app
+
+
+		# Get pages by rendering pages_xml
+		cprint.section('Rendering pages.xml')
+		pages = app.generator.render_pages_xml( app.config.path.pages_xml )
 		
+
+		cprint.section('%s pages are opened' % len(pages))
+
 
 		# change data format for pages
 		# array to dict which key is url
@@ -30,7 +40,7 @@ class Listener :
 			url = self.format_url( page['url'] )
 			npages[url] = ( page['template'], page['context'] )
 
-			print('/' + url)
+			cprint.line('/' + url)
 
 		self.pages = npages
 
@@ -39,6 +49,9 @@ class Listener :
 	def listen(self, port, host) :
 		""" Start listening HTTP server with Flask
 		"""
+		cprint.section('Open Local Server with Flask')
+
+
 		flaskapp = flask.Flask(__name__)
 
 		flaskapp.add_url_rule('/', 'index', self.response)
@@ -72,7 +85,7 @@ class Listener :
 			context = self.pages[url][1]
 
 			# Render template with jinja
-			env = jinja2.Environment( loader=jinja2.FileSystemLoader( self.app.config.path.tpl ) )
+			env = self.app.generator.get_jinja_env()
 			template = env.get_template(tpl)
 
 			output = template.render(context)

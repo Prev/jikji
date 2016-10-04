@@ -13,15 +13,12 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-import ast
-import os
-import sys
-import time
+import ast, os, sys, shutil
+import time, datetime
 import json
 import jinja2
 import xml.etree.ElementTree as ET
 import traceback
-import shutil
 
 from .cprint import cprint
 from .utils import History
@@ -46,6 +43,22 @@ class Generator :
 		self.model = model
 		self.history = None
 
+
+	def get_jinja_env(self) :
+		""" Jinja env customized
+		"""
+
+		env = jinja2.Environment(
+			loader = jinja2.FileSystemLoader( self.configpath.tpl ),
+			autoescape = True
+		)
+		
+		# Put functions to jinja2 filter
+		for name, cls in functions.__dict__.items() :
+			if len(name) > 0 and name[0] != '_' :
+				env.filters[name] = cls
+
+		return env
 
 	def generate(self) :
 		""" Generate pages
@@ -84,7 +97,8 @@ class Generator :
 
 
 		# template renderer Environment
-		env = jinja2.Environment( loader=jinja2.FileSystemLoader( self.configpath.tpl ) )
+		env = self.get_jinja_env()
+
 
 		for page in pages :
 			template = env.get_template( page['template'] )
@@ -179,7 +193,8 @@ class Generator :
 		
 		# Put functions to context
 		for name, cls in functions.__dict__.items() :
-			context[name] = cls
+			if len(name) > 0 and name[0] != '_' :
+				context[name] = cls
 
 
 		rendered_xml = tpl.render(context)
@@ -195,15 +210,20 @@ class Generator :
 
 		for page in page_tags :
 			# parse context
-			ctx_txt = page.find('context').text.strip()
+			ctx_tag = page.find('context')
 
-			if page.find('context').attrib.get('type') == 'json' :
-				ctx_dict = json.loads( ctx_txt )
-
+			if ctx_tag is None :
+				ctx_dict = {}
 			else :
+				ctx_txt = ctx_tag.text.strip()
 				try :
-					ctx_dict = ast.literal_eval( ctx_txt )
+					if ctx_tag.attrib.get('type') == 'json' :
+						ctx_dict = json.loads( ctx_txt )
+					else :
+						ctx_dict = ast.literal_eval( ctx_txt )
+
 				except ValueError as e :
+					cprint.section()
 					cprint.warn(ctx_txt)
 					self._finish(False, 'ValueError occurs while parse context in pages.xml', e)
 
