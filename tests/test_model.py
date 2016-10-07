@@ -8,19 +8,9 @@
 """
 
 import pytest
-import flask
 
 from jikji import Jikji
 from jikji.model import ModelException
-
-
-def test_cache() :
-	jikji = Jikji('tests/test_site/config1.json')
-	model = jikji.model
-
-	model.cache.set('foo', 'bar')
-	assert model.cache.get('foo') == 'bar'
-
 
 
 def test_model1() :

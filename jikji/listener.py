@@ -58,6 +58,9 @@ class Listener :
 		flaskapp.add_url_rule('/<path:url>', 'response', self.response)
 		flaskapp.run(port=port, host=host)
 
+		self.flaskapp = flaskapp
+
+
 
 	def format_url(self, url) :
 		""" Format url to check equals
@@ -89,7 +92,7 @@ class Listener :
 			template = env.get_template(tpl)
 
 			output = template.render(context)
-			return output
+			return output, 200
 
 
 		for assetdir in self.app.config.path.assets :

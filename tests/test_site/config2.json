@@ -10,5 +10,7 @@
 		"template": "templates",
 		"output": "generated/2",
 		"pages_xml": "pages2.xml"
-	}
+	},
+
+	"log_history": true
 }

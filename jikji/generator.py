@@ -50,7 +50,9 @@ class Generator :
 
 		env = jinja2.Environment(
 			loader = jinja2.FileSystemLoader( self.configpath.tpl ),
-			autoescape = True
+			autoescape = True,
+			trim_blocks = True,
+			lstrip_blocks = True
 		)
 		
 		# Put functions to jinja2 filter
@@ -59,6 +61,7 @@ class Generator :
 				env.filters[name] = cls
 
 		return env
+		
 
 	def generate(self) :
 		""" Generate pages
