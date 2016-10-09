@@ -24,12 +24,17 @@ def test_generate() :
 
 	jikji.generate()
 
+
+
 	for i in range(1, 5) :
 		with open('%s/%s.html' % (output_dir, i), 'r') as f: c = f.read()
 		assert c == '<div>%s</div>' % i
 
+
+	with open('%s/index.html' % output_dir, 'r') as f : c = f.read()
+	assert c == '<p>Hello</p>'
+
+
 	with open('%s/README.md' % output_dir, 'r') as f: c = f.read()
 	with open('%s/README.md' % assets_dir, 'r') as f: c2 = f.read()
 	assert c == c2
-
-

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <site>
+	<page>
+		<url>/</url>
+		<template>home.html</template>
+	</page>
+
+
 	{% for i in range(1, 5) %}
 	<page>
 		<url>{{ i }}.html</url>

@@ -33,20 +33,19 @@ $ pip install jikji
 
 ## Usage
 ```bash
-jikji sample_site generate
+$ jikji <my_site> generate
 ```
 or
 ```python
 from jikji import Jikji
-jikji = Jikji('sample_site')
+jikji = Jikji('my_site')
 jikji.generate()
 ```
 
 
-# template engine
+## template engine
 `jikji` use [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
 You can see jinja template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/).
-
 
   
 ## config.json
@@ -94,16 +93,16 @@ After getting data in RESTFul Server, you can make **page tag** with model data 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <site>
-	{% set all_docs = model.get('/test/_all_docs') %}
+	{% set all_docs = model.get('/_all_docs') %}
 	<page>
 		<url>/</url>
 		<context>{{ all_docs }}</context>
 		<template>home.html</template>
 	</page>
-	{% for row in all_docs.rows %}
+	{% for id in all_docs.rows %}
 	<page>
-		<url>/doc/{{ row.id }}/</url>
-		<context>{{ model.get('/test/' + row.id) }}</context>
+		<url>/doc/{{ id }}/</url>
+		<context>{{ model.get('/doc/' + id) }}</context>
 		<template>document.html</template>
 	</page>
 	{% endfor %}
@@ -113,8 +112,48 @@ After getting data in RESTFul Server, you can make **page tag** with model data 
 After template is rendered, `jikji` generate pages by this information.
 
 First, generator get template file declared in `template` tag.  
-And then, inject `context` data to template and render it.
+And then, inject `context` data to template and render it.  
 Finally, create static page file with name declared in `url` tag.
 
+You can look sample 
+
+
+#### sample response of /_all_docs
+```json
+{
+	"site": "Sample site",
+	"rows": [
+		"a69425f9d9dc1b",
+		"ca3dfe24aaeca0"
+	]
+}
+```
+#### rendered pages of sample
+- /index.html
+- /doc/a69425f9d9dc1b/index.html
+- /doc/ca3dfe24aaeca0/index.html
+
+  
+
+
+# Realtime develop
+You don't have to generate all the time after modify template.  
+`Jikji` has useful function to develop in realtime
+
+
+run jikji as __listening__ mode
+
+```bash
+$ jikji <my_site> listen
+$ jikji <my_site> listen --port PORT --host HOST
+```
+
+Then you can see rendered website in your browser (default: http://localhost:7000)
+
+Web server opened with [Flask](http://flask.pocoo.org/), and when you reload the website, jikji will re-rendering template
+
+
+But one server is opened, jikji **DO NOT** reload **MODEL** from rest server.  
+Please close flask server if you need to reload model data.
 
 

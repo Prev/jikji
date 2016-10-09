@@ -22,6 +22,10 @@ def test_listener1() :
 		assert r[0] == '<div>%s</div>' % i
 
 
+	r = listener.response('/')
+	assert r[0] == '<p>Hello</p>'
+
+
 	r = listener.response('/css/stylesheet.css')
 	assert r[0] == b'html,body{ margin:0; padding:0 }'
 
