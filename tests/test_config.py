@@ -30,8 +30,13 @@ def test_config1() :
 	assert config.log_history == False
 
 
+	assert config.imports == []
+
+
 def test_config2() :
 	jikji = Jikji(os.path.join('tests', 'test_site', 'config2.json'))
 	config = jikji.config
 
 	assert config.path.assets == []
+
+	assert config.imports == ["time", ["datetime", "datetime"]]

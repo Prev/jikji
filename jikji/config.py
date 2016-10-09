@@ -104,6 +104,10 @@ class Config :
 		return self._config.get('log_history', False)
 	
 
+	@property
+	def imports(self) :
+		return self._config.get('imports', [])
+
 
 
 

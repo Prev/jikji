@@ -2,12 +2,14 @@
 <site>
 	<page>
 		<url>/</url>
-		<context>{{
-			model.get(
-				api = '/users/Prev',
-				immutable = True
-			)
-		}}</context>
+		<context>
+			{{
+				dict(
+					name = "Prev",
+					url = "https://github.com/Prev"
+				)
+			}}
+		</context>
 		<template>template2.html</template>
 	</page>
 </site>

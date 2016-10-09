@@ -14,7 +14,7 @@ import shutil
 from jikji import Jikji
 
 
-def test_generate() :
+def test_generate1() :
 	jikji = Jikji('tests/test_site/config1.json')
 	output_dir = jikji.config.path.output
 	assets_dir = jikji.config.path.assets[0]
@@ -38,3 +38,36 @@ def test_generate() :
 	with open('%s/README.md' % output_dir, 'r') as f: c = f.read()
 	with open('%s/README.md' % assets_dir, 'r') as f: c2 = f.read()
 	assert c == c2
+
+
+
+
+def test_generate2() :
+	jikji = Jikji('tests/test_site/config2.json')
+	output_dir = jikji.config.path.output
+
+	if os.path.exists( output_dir ) :
+		shutil.rmtree( output_dir )
+
+	jikji.generate()
+
+	
+
+
+def test_get_context_imported() :
+	jikji = Jikji('tests/test_site/config2.json')
+	g = jikji.generator
+
+	import time
+	from datetime import datetime
+
+	ctx = g.get_context_imported()
+	
+	assert ctx['time'] == time
+	assert ctx['datetime'] == datetime
+
+
+
+
+
+

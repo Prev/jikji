@@ -13,17 +13,18 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-import ast, os, sys, shutil
-import time, datetime
-import json
-import jinja2
-import xml.etree.ElementTree as ET
+import os, sys, shutil
+import ast, json
+import time
+import importlib
 import traceback
+import xml.etree.ElementTree as ET
+
+import jinja2
 
 from .cprint import cprint
 from .utils import History
 from .model import ModelException
-from . import functions
 
 class Generator :
 	
@@ -34,7 +35,7 @@ class Generator :
 
 	def __init__(self, config, model) :
 		""" Constructor
-		:param configpath: jikji.config.Config instance
+		:param config: jikji.config.Config instance
 		:param model: jikji.model.Model instance
 		"""
 
@@ -44,23 +45,46 @@ class Generator :
 		self.history = None
 
 
-	def get_jinja_env(self) :
-		""" Jinja env customized
-		"""
-
-		env = jinja2.Environment(
+		self.jinja_env = jinja2.Environment(
 			loader = jinja2.FileSystemLoader( self.configpath.tpl ),
 			autoescape = True,
 			trim_blocks = True,
 			lstrip_blocks = True
 		)
-		
-		# Put functions to jinja2 filter
-		for name, cls in functions.__dict__.items() :
-			if len(name) > 0 and name[0] != '_' :
-				env.filters[name] = cls
 
-		return env
+
+	def get_context_imported(self, context=None) :
+		""" Get context instance with importing modules defined in config.imports
+		
+		If config.imports is [['datetime', 'datetime']],
+		Code run like "from datetime import datetime"
+		
+		:param context: default Context instance that overwrite output
+		"""
+		output = {}
+
+		for module_name in self.config.imports :
+			if isinstance(module_name, list) : 
+				class_name = module_name[1]
+				module_name = module_name[0]
+			else :
+				class_name = None
+
+			module = importlib.import_module(module_name)
+			
+			if class_name is not None :
+				# get attr in module
+				# run like "from ~~ import ~~"
+				module = getattr(module, class_name)
+
+			output[module_name] = module
+
+		# overwrite output
+		if context is not None :
+			for key, val in context.items() :
+				output[key] = val
+
+		return output
 		
 
 	def generate(self) :
@@ -99,13 +123,7 @@ class Generator :
 		cprint.bold('Output in "%s"\n' % output_dir)
 
 
-		# template renderer Environment
-		env = self.get_jinja_env()
-
-
 		for page in pages :
-			template = env.get_template( page['template'] )
-
 			path = self._get_output_file_path(
 				url = page['url'],
 				output_dir = output_dir
@@ -120,7 +138,7 @@ class Generator :
 				self._generate_page(
 					output_file = path,
 					context = page['context'],
-					template = template,
+					template = page['template'],
 				)
 			
 			except jinja2.exceptions.TemplateError as e :
@@ -188,18 +206,12 @@ class Generator :
 
 		
 		tpl = jinja2.Template(pages_config_content)
-		context = {
-			'model': self.model,
-			'time': time,
+
+		context = self.get_context_imported({
+			'model' : self.model,
 			'json': json
-		}
+		});
 		
-		# Put functions to context
-		for name, cls in functions.__dict__.items() :
-			if len(name) > 0 and name[0] != '_' :
-				context[name] = cls
-
-
 		rendered_xml = tpl.render(context)
 
 		if self.history :
@@ -257,13 +269,15 @@ class Generator :
 		:params
 			- output_file: output_file_path(url + output_dir) (string)
 			- context: context dict of template (string)
-			- template: jinja2 template instance
+			- template: template file path
 		
 		"""
 
 
 		# render with jinja template
-		output = template.render(context)
+		jtpl = self.jinja_env.get_template(template)
+		output = jtpl.render( self.get_context_imported( context ))
+
 
 		# if dictionary not exists, make dirs
 		os.makedirs( os.path.dirname(output_file), exist_ok=True )

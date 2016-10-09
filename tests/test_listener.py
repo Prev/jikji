@@ -29,3 +29,9 @@ def test_listener1() :
 	r = listener.response('/css/stylesheet.css')
 	assert r[0] == b'html,body{ margin:0; padding:0 }'
 
+
+
+def test_listener2() :
+	app = Jikji('tests/test_site/config2.json')
+	listener = Listener(app)
+	listener.response('/')

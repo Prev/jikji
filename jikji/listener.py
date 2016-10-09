@@ -88,10 +88,9 @@ class Listener :
 			context = self.pages[url][1]
 
 			# Render template with jinja
-			env = self.app.generator.get_jinja_env()
-			template = env.get_template(tpl)
+			jtpl = self.app.generator.jinja_env.get_template(tpl)
 
-			output = template.render(context)
+			output = jtpl.render( self.app.generator.get_context_imported(context))
 			return output, 200
 
 

@@ -12,5 +12,7 @@
 		"pages_xml": "pages2.xml"
 	},
 
-	"log_history": true
+	"log_history": true,
+
+	"imports": ["time", ["datetime", "datetime"]]
 }
