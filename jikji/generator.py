@@ -99,7 +99,7 @@ class Generator :
 		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.configpath.sitepath))
 
 		cprint.section('Parse pages.xml with Rest Server')
-		cprint.bold('With Rest server "%s"\n' % self.model.get_baseurl())
+		cprint.bold('With Rest server "%s"\n' % self.model.get_default_baseurl())
 
 
 		# render pages.xml

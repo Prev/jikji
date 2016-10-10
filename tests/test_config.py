@@ -26,7 +26,7 @@ def test_config1() :
 	assert config.path.pages_xml == os.path.join(basedir, 'pages1.xml')
 	assert config.path.assets == [os.path.join(basedir, 'assets')]
 
-	assert config.server_info['base_url'] == 'http://echo.jsontest.com'
+	assert config.server_info['baseurl'] == 'http://echo.jsontest.com'
 	assert config.log_history == False
 
 

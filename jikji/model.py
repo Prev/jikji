@@ -18,73 +18,115 @@ from .cprint import cprint
 class Model :
 
 	__attrs__ =[
-		'cache', '_baseurl', '_headers'	
+		'cache', '_default_baseurl', '_default_headers', '_forms'
 	]
 
 
 	def __init__(self, server_info, cache) :
 		""" Init Model instance
 		"""
-		self.set_baseurl( server_info.get('base_url', '') )
-		self.set_headers( server_info.get('headers', None) )
+		self.set_default_baseurl( server_info.get('baseurl', '') )
+		self.set_default_headers( server_info.get('headers', None) )
 		self.cache = cache
 
-
-	def set_baseurl(self, value) :
-		if len(value) > 0 and value[-1] == '/' :
-			value = value[0:-1]
-
-		self._baseurl = value
-
-
-	def get_baseurl(self) :
-		return self._baseurl
+		self._forms = {}
 
 
 
-	def set_headers(self, dictval) :
+	def _filter_baseurl(self, baseurl) :
+		""" Remove last char if it is '/'
+		"""
+		if len(baseurl) > 0 and baseurl[-1] == '/' :
+			baseurl = baseurl[0:-1]
+
+		return baseurl
+
+
+
+	def set_default_baseurl(self, value) :
+		""" Set default baseurl (like host)
+			Remove last char if it is '/'
+		"""
+		self._default_baseurl = self._filter_baseurl(value)
+
+
+	def get_default_baseurl(self) :
+		""" Get default baseurl
+		"""
+		return self._default_baseurl
+
+
+
+
+	def set_default_headers(self, dictval) :
+		""" Set default headrs
+			Append Content-Type to application/json
+		"""
 		if dictval is None :
 			dictval = {}
 
 		if dictval.get('Content-Type') is None :
 			dictval['Content-Type'] = 'application/json'
 
-		self._headers = dictval
+		self._default_headers = dictval
 
 
-	def get_headers(self) :
-		return self._headers
+	def get_default_headers(self) :
+		""" Get default headers
+		"""
+		return self._default_headers
+
+
+	def get_headers(self, headers=None) :
+		""" Return default_headers if param 'headers' is None,
+			else return headers
+		"""
+		if headers is not None :
+			return headers
+		else :
+			return self.get_default_headers()
 
 
 
-	def geturl(self, api) :
+	def geturl(self, api, baseurl=None) :
+		""" Get full url combining with api and baseurl
+		"""
 		if api[0] != '/' :
 			api = '/' + api
-		return self.get_baseurl() + api
+
+		if baseurl is not None: 
+			return self._filter_baseurl(baseurl) + api
+		else :
+			return self.get_default_baseurl() + api
 
 
 
-	def _rest(self, type, api, data=None, parsejson=True) :
+	def _rest(self, method, api, data=None, baseurl=None, headers=None, parsejson=True) :
 		""" Rest Call to server
 		:params
-			- type: GET, POST, PUT, or DELETE
+			- method: GET, POST, PUT, or DELETE
 			- api: api string appended to baseurl
 			- data: url form data (default: None)
+			- baseurl: baseurl of api (default: jikji.Config.server_info.baseurl)
+			- headers: headers in http call (default: jikji.Config.server_info.headers)
+			- parsejson = boolean status of parsing result to json (default: True)
 
 		:return json-parsed object
 		"""
 
-		cprint.write("%s '%s' " % (type.upper(), api))
+		url = self.geturl(api, baseurl)
 
 		if data is not None :
 			data = json.dumps(data)
+			
 
+		cprint.write("%s '%s' "% (method.upper(), (api if (baseurl is None) else url) ))
 
 		# Call proper method of requests (maybe GET, POST or ext)
-		r = getattr(requests, type.lower())(
-			url = self.geturl(api),
+		r = getattr(requests, method.lower())(
+			url = url,
 			data = data,
-			headers = self.get_headers()
+			headers = self.get_headers(headers)
 		)
 
 		try :
@@ -97,8 +139,6 @@ class Model :
 			cprint.error('%s' % me.status)
 			raise me
 
-		
-
 
 		if parsejson :
 			result = r.json()
@@ -109,17 +149,19 @@ class Model :
 		return result
 
 
-	def get(self, api, data=None, immutable=False) :
+	def get(self, api, data=None, baseurl=None, headers=None, immutable=False) :
 		""" Send a GET request to REST Sever
 		:params
 			- api: api string
 			- data: url form data (default: None)
+			- baseurl: baseurl of api (default: jikji.Config.server_info.baseurl)
+			- headers: headers in http call (default: jikji.Config.server_info.headers)
 			- immutable: if immutable, make cache with key of api url (default: False)
 
 		:return json-parsed object
 		"""
 
-		url = self.geturl(api)
+		url = self.geturl(api, baseurl)
 
 		# If immutable, use cache
 		if immutable == True :
@@ -130,7 +172,7 @@ class Model :
 				return cachedata
 
 
-		result = self._rest('GET', api, data)
+		result = self._rest('GET', api, data, baseurl, headers)
 
 		if immutable == True :
 			self.cache.set(url, result)
@@ -139,41 +181,84 @@ class Model :
 
 
 
-	def post(self, api, data=None) :
+	def post(self, api, data=None, baseurl=None, headers=None) :
 		""" Send a POST request to REST Sever
-		:params
-			- api: api string
-			- data: url form data (default: None)
-
-		:return json-parsed object
+		:params: (same with self.post)
+		:return: json-parsed object
 		"""
-		return self._rest('POST', api, data)
+		return self._rest('POST', api, data, baseurl, headers)
 
 
 
-	def put(self, api, data=None) :
+	def put(self, api, data=None, baseurl=None, headers=None) :
 		""" Send a PUT request to REST Sever
-		:params
-			- api: api string
-			- data: url form data (default: None)
-
-		:return json-parsed object
+		:params: (same with self.post)
+		:return: json-parsed object
 		"""
-		return self._rest('PUT', api, data)
+		return self._rest('PUT', api, data, baseurl, headers)
 
 
 
-	def delete(self, api, data=None) :
+	def delete(self, api, data=None, baseurl=None, headers=None) :
 		""" Send a DELETE request to REST Sever
-		:params
-			- api: api string
-			- data: url form data (default: None)
-
-		:return json-parsed object
+		:params: (same with self.post)
+		:return: json-parsed object
 		"""
-		return self._rest('DELETE', api, data)
+		return self._rest('DELETE', api, data, baseurl, headers)
 
 
+
+	def makeform(self, name, method, api, data=None, baseurl=None, headers=None, immutable=False) :
+		""" Make form of model
+		:params
+			- name: name of form, call form by this value
+			- method: method of form
+			- api: api string on request
+				special string "$n" will be replaced with *args in `self.form`
+				ex) '/_design/$1/_view/$2'
+
+			- **others: (sname with self.get)
+		"""
+
+		self._forms[name] = {
+			'method' : method,
+			'api'    : api,
+			'data'   : data,
+			'baseurl': baseurl,
+			'headers': headers,
+			'immutable': immutable
+		}
+
+
+	def form(self, name, *args) :
+		""" Call form of model
+		:params
+			- name: name of form
+			- *args: replacing string in api
+		"""
+
+		curform = self._forms[name]
+
+		method = curform['method']
+		api = curform['api']
+
+		for index, arg in enumerate(args):
+			api = api.replace('$%d' % (index+1), arg)
+
+		kwarg = {
+			'api'       : api,
+			'data'      : curform['data'],
+			'baseurl'   : curform['baseurl'],
+			'headers'   : curform['headers']
+		}
+
+		if method.upper() == 'GET' :
+			kwarg['immutable'] = curform['immutable']
+			return self.get(**kwarg)
+
+		else :
+			kwarg['method'] = method
+			return self._rest(**kwarg)
 
 
 

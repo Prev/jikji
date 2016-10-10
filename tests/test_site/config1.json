@@ -1,6 +1,6 @@
 {
 	"server_info": {
-		"base_url": "http://echo.jsontest.com"
+		"baseurl": "http://echo.jsontest.com"
 	},
 
 	"path": {

@@ -55,7 +55,7 @@ Configure directory structure of site, and rest api server's information.
 {
 	"server_info": {
 		"type": "cloudant",
-		"base_url": "https://rexpress.cloudant.com/",
+		"baseurl": "https://rexpress.cloudant.com/",
 		"headers": {
 			"Authorization": "Basic aGVsbG93b3JsZDpoZWxsb3dvcmxkMTIz="
 		}
