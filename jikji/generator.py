@@ -29,7 +29,7 @@ class Generator :
 	
 	__attrs__ =[
 		'config', 'configpath', 'model', 'history'
-		'_gen_start_time'
+		'_gen_start_time', '_globar_vars'
 	]
 
 	def __init__(self, config, model) :
@@ -43,26 +43,29 @@ class Generator :
 		self.model = model
 		self.history = None
 
+		self._globar_vars = {}
+		self._globar_vars['json'] = json
+		self._globar_vars['model'] = model
 
-		# jinja2 env
+		# Assign modules in 'config.imports' to global vars
+		ImportTool.assign(
+			target = self._globar_vars,
+			modules = config.imports,
+			sitepath = config.sitepath,
+		)
+
+
+		# Init jinja2 env
 		self.jinja_env = jinja2.Environment(
 			loader = jinja2.FileSystemLoader( self.configpath.tpl ),
 			autoescape = True,
 			trim_blocks = True,
 			lstrip_blocks = True
 		)
-
-		# Add json to jinja_env global var
-		self.jinja_env.globals['json'] = json
-
-
-		# Assign modules in 'config.imports' to globals property of jinja_env
-		ImportTool.assign(
-			target = self.jinja_env.globals,
-			modules = config.imports,
-			sitepath = config.sitepath,
-		)
 		
+		# Make globals property of jinja_env to _globar_bars
+		self.jinja_env.globals = self._globar_vars
+
 
 
 	def generate(self) :
@@ -179,17 +182,16 @@ class Generator :
 		:param pages_xml_path: string
 		:return array of pages data
 		"""
+
 		with open(pages_xml_path, 'r') as file:
 			pages_config_content = file.read()
-
 		
-		tpl = jinja2.Template(pages_config_content)
+		jtpl = jinja2.Template(pages_config_content)
+		rendered_xml = jtpl.render(self._globar_vars)
 
-		rendered_xml = tpl.render({
-			'model' : self.model
-		})
 
 		if self.history :
+			# Log pages.xml if History is enabled
 			self.history.log('pages.xml', rendered_xml)
 
 
@@ -243,7 +245,7 @@ class Generator :
 
 		:params
 			- context: context dict of template (string)
-			- template: template file path
+			- template: template file path or Template Class
 			- output_file: output_file_path(url + output_dir) (string)
 				if None, do not make file (default)
 		
@@ -252,6 +254,7 @@ class Generator :
 
 		# render with jinja template
 		jtpl = self.jinja_env.get_template(template)
+
 		output = jtpl.render( context )
 
 		if output_file is not None :

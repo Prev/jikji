@@ -12,4 +12,29 @@
 		</context>
 		<template>template2.html</template>
 	</page>
+
+
+	<page>
+		<url>/test/1.html</url>
+		<context type="json">
+			{
+				"name": "^_^",
+				"url": "http://google.com"
+			}
+		</context>
+		<template>template2.html</template>
+	</page>
+
+	<page>
+		<url>/test/2.html</url>
+		<context type="json">
+			{{
+				json.dumps({
+					'name': 'dadas',
+					'url': 'http://google.com'
+				})
+			}}
+		</context>
+		<template>template2.html</template>
+	</page>
 </site>
