@@ -254,7 +254,7 @@ class ImportTool() :
 				# For python 3.5+
 				spec = importlib.util.spec_from_file_location(module_name, path)
 				module = importlib.util.module_from_spec(spec)
-				spec.loader.exec_module(lib)
+				spec.loader.exec_module(module)
 				
 
 			else :
