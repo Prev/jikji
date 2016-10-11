@@ -18,7 +18,7 @@ from .cprint import cprint
 class Model :
 
 	__attrs__ =[
-		'cache', '_default_baseurl', '_default_headers', '_forms'
+		'cache', '_default_baseurl', '_default_headers', '_macros'
 	]
 
 
@@ -29,7 +29,7 @@ class Model :
 		self.set_default_headers( server_info.get('headers', None) )
 		self.cache = cache
 
-		self._forms = {}
+		self._macros = {}
 
 
 
@@ -208,19 +208,19 @@ class Model :
 
 
 
-	def makeform(self, name, method, api, data=None, baseurl=None, headers=None, immutable=False) :
-		""" Make form of model
+	def make_macro(self, name, method, api, data=None, baseurl=None, headers=None, immutable=False) :
+		""" Make macro of model
 		:params
-			- name: name of form, call form by this value
-			- method: method of form
+			- name: name of macro, call macro by this value
+			- method: method of macro
 			- api: api string on request
-				special string "$n" will be replaced with *args in `self.form`
+				special string "$n" will be replaced with *args in `self.macro`
 				ex) '/_design/$1/_view/$2'
 
 			- **others: (sname with self.get)
 		"""
 
-		self._forms[name] = {
+		self._macros[name] = {
 			'method' : method,
 			'api'    : api,
 			'data'   : data,
@@ -230,30 +230,30 @@ class Model :
 		}
 
 
-	def form(self, name, *args) :
-		""" Call form of model
+	def macro(self, name, *args) :
+		""" Call macro of model
 		:params
-			- name: name of form
+			- name: name of macro
 			- *args: replacing string in api
 		"""
 
-		curform = self._forms[name]
+		cur_macro = self._macros[name]
 
-		method = curform['method']
-		api = curform['api']
+		method = cur_macro['method']
+		api = cur_macro['api']
 
 		for index, arg in enumerate(args):
 			api = api.replace('$%d' % (index+1), arg)
 
 		kwarg = {
 			'api'       : api,
-			'data'      : curform['data'],
-			'baseurl'   : curform['baseurl'],
-			'headers'   : curform['headers']
+			'data'      : cur_macro['data'],
+			'baseurl'   : cur_macro['baseurl'],
+			'headers'   : cur_macro['headers']
 		}
 
 		if method.upper() == 'GET' :
-			kwarg['immutable'] = curform['immutable']
+			kwarg['immutable'] = cur_macro['immutable']
 			return self.get(**kwarg)
 
 		else :

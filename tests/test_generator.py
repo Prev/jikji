@@ -51,23 +51,5 @@ def test_generate2() :
 
 	jikji.generate()
 
-	
-
-
-def test_get_context_imported() :
-	jikji = Jikji('tests/test_site/config2.json')
-	g = jikji.generator
-
-	import time
-	from datetime import datetime
-
-	ctx = g.get_context_imported()
-	
-	assert ctx['time'] == time
-	assert ctx['datetime'] == datetime
-
-
-
-
 
 

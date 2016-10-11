@@ -8,10 +8,10 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import os
-import shutil
+import os, shutil, sys
 import json
 import re
+import importlib
 from datetime import datetime
 from urllib.parse import quote_plus, unquote_plus
 
@@ -197,6 +197,79 @@ class History(AppDataUtil) :
 		""" Close opened files
 		"""
 		cprint.end_capture_file()
+
+
+
+class ImportTool() :
+
+	@staticmethod
+	def assign(target, modules, sitepath='') :
+		""" Import modules to target
+		:params
+			- target: target to assign module (dictionary)
+			- modules: list of importing module
+				- if value is string, import module by string
+				- if value is list, import module by first element([0]) and get attr of module by second element([1])
+			- sitepath: path of rendering site. Load module if file is exists in sitepath
+		"""
+
+		for module_name in modules :
+			if isinstance(module_name, list) :
+				module, _ = ImportTool.import_module(module_name[0], sitepath)
+
+				attr_name = module_name[1]
+				target[attr_name] = getattr(module, attr_name)
+
+			else :
+				module, module_name = ImportTool.import_module(module_name, sitepath)
+				target[module_name] = module
+
+
+
+	@staticmethod
+	def import_module(module_name, path='') :
+		""" Import module
+			If module exists in python lib, load by importlib
+			Else, find module by path
+		"""
+		module = None
+
+		try :
+			# Load module by importlib
+			module = importlib.import_module(module_name)
+
+		except ImportError as e:
+			if module_name.find('/') != -1 :
+				# if module name is path, process it
+				tmp = module_name.split('/')
+				module_name = tmp.pop()
+				path = os.path.join( path, *tmp )
+
+
+			if path != '' and path[-3:] != '.py' :
+				# Make directory path to file path by joining
+				path = os.path.join(path, module_name + '.py')
+
+			if sys.version_info >= (3, 5) :
+				# For python 3.5+
+				spec = importlib.util.spec_from_file_location(module_name, path)
+				module = importlib.util.module_from_spec(spec)
+				spec.loader.exec_module(lib)
+				
+
+			else :
+				# For python 3.3 and 3.4
+				from importlib.machinery import SourceFileLoader
+				module = SourceFileLoader(module_name, path).load_module()
+
+
+			if module is None :
+				raise e
+
+		return module, module_name
+
+
+
 
 
 

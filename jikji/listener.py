@@ -84,13 +84,15 @@ class Listener :
 		url = self.format_url(url)
 
 		if url in self.pages :
-			tpl = self.pages[url][0]
+			template = self.pages[url][0]
 			context = self.pages[url][1]
 
 			# Render template with jinja
-			jtpl = self.app.generator.jinja_env.get_template(tpl)
-
-			output = jtpl.render( self.app.generator.get_context_imported(context))
+			output = self.app.generator.generate_page(
+				context = context,
+				template = template,
+			)
+			
 			return output, 200
 
 

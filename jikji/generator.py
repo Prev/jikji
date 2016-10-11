@@ -16,14 +16,13 @@
 import os, sys, shutil
 import ast, json
 import time
-import importlib
 import traceback
 import xml.etree.ElementTree as ET
 
 import jinja2
 
 from .cprint import cprint
-from .utils import History
+from .utils import History, ImportTool
 from .model import ModelException
 
 class Generator :
@@ -45,6 +44,7 @@ class Generator :
 		self.history = None
 
 
+		# jinja2 env
 		self.jinja_env = jinja2.Environment(
 			loader = jinja2.FileSystemLoader( self.configpath.tpl ),
 			autoescape = True,
@@ -52,40 +52,18 @@ class Generator :
 			lstrip_blocks = True
 		)
 
+		# Add json to jinja_env global var
+		self.jinja_env.globals['json'] = json
 
-	def get_context_imported(self, context=None) :
-		""" Get context instance with importing modules defined in config.imports
+
+		# Assign modules in 'config.imports' to globals property of jinja_env
+		ImportTool.assign(
+			target = self.jinja_env.globals,
+			modules = config.imports,
+			sitepath = config.sitepath,
+		)
 		
-		If config.imports is [['datetime', 'datetime']],
-		Code run like "from datetime import datetime"
-		
-		:param context: default Context instance that overwrite output
-		"""
-		output = {}
 
-		for module_name in self.config.imports :
-			if isinstance(module_name, list) : 
-				class_name = module_name[1]
-				module_name = module_name[0]
-			else :
-				class_name = None
-
-			module = importlib.import_module(module_name)
-			
-			if class_name is not None :
-				# get attr in module
-				# run like "from ~~ import ~~"
-				module = getattr(module, class_name)
-
-			output[module_name] = module
-
-		# overwrite output
-		if context is not None :
-			for key, val in context.items() :
-				output[key] = val
-
-		return output
-		
 
 	def generate(self) :
 		""" Generate pages
@@ -135,7 +113,7 @@ class Generator :
 			try :
 				# Context is not parsed with json but ast
 				#  because in pages xml, context value is not printed with json.dumps
-				self._generate_page(
+				self.generate_page(
 					output_file = path,
 					context = page['context'],
 					template = page['template'],
@@ -207,12 +185,9 @@ class Generator :
 		
 		tpl = jinja2.Template(pages_config_content)
 
-		context = self.get_context_imported({
-			'model' : self.model,
-			'json': json
-		});
-		
-		rendered_xml = tpl.render(context)
+		rendered_xml = tpl.render({
+			'model' : self.model
+		})
 
 		if self.history :
 			self.history.log('pages.xml', rendered_xml)
@@ -263,27 +238,30 @@ class Generator :
 
 
 
-	def _generate_page(self, output_file, context, template) :
+	def generate_page(self, context, template, output_file=None) :
 		""" Generate page via page_obj)
 
 		:params
-			- output_file: output_file_path(url + output_dir) (string)
 			- context: context dict of template (string)
 			- template: template file path
+			- output_file: output_file_path(url + output_dir) (string)
+				if None, do not make file (default)
 		
 		"""
 
 
 		# render with jinja template
 		jtpl = self.jinja_env.get_template(template)
-		output = jtpl.render( self.get_context_imported( context ))
+		output = jtpl.render( context )
 
+		if output_file is not None :
+			# if dictionary not exists, make dirs
+			os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
-		# if dictionary not exists, make dirs
-		os.makedirs( os.path.dirname(output_file), exist_ok=True )
+			with open(output_file, 'w') as file:
+				file.write(output)
 
-		with open(output_file, 'w') as file:
-			file.write(output)
+		return output
 
 
 	

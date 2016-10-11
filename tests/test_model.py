@@ -27,13 +27,13 @@ def test_model1() :
 
 
 	# test form
-	model.makeform(
+	model.make_macro(
 		name = 'form1',
 		method = 'GET',
 		api = '/var1/$1/var2/$2'
 	)
 
-	r = model.form('form1', 'data1', 'data2')
+	r = model.macro('form1', 'data1', 'data2')
 	assert r['var1'] == 'data1'
 	assert r['var2'] == 'data2'
 

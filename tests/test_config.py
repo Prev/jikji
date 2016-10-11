@@ -39,4 +39,4 @@ def test_config2() :
 
 	assert config.path.assets == []
 
-	assert config.imports == ["time", ["datetime", "datetime"]]
+	assert config.imports == ["time", ["datetime", "datetime"], "lib/custom_lib"]
