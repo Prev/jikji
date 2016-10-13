@@ -2,9 +2,20 @@
 <site>
 	{% set all_docs = model.get('/test/_design/share-view/_view/share-list') %}
 
+	
+
 	<page>
 		<url>/</url>
 		<context>{{ dict(docs = all_docs) }}</context>
+		<template>home.html</template>
+	</page>
+
+
+	<page>
+		<url>/invalid_page.html</url>
+		<context>
+			{{ model.get('/invalid_api') }}
+		</context>
 		<template>home.html</template>
 	</page>
 

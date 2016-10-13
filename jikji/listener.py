@@ -38,9 +38,14 @@ class Listener :
 		npages = {}
 		for page in pages :
 			url = self.format_url( page['url'] )
-			npages[url] = ( page['template'], page['context'] )
+			context = page['context']
 
-			cprint.line('/' + url)
+			npages[url] = ( page['template'], context )
+
+			if 'error' in context :
+				cprint.warn('/' + url)
+			else :
+				cprint.line('/' + url)
 
 		self.pages = npages
 

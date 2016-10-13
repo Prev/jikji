@@ -57,6 +57,6 @@ class Jikji :
 		"""
 		cprint.line('Using Jikji %s ' % __version__)
 		
-		self._generator.generate()
+		return self._generator.generate()
 
 

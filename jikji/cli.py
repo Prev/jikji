@@ -51,8 +51,9 @@ def generate_command(ctx) :
 	""" Generate static site
 	"""
 	app = ctx.obj['APP']
-	app.generate()
-
+	r = app.generate()
+	
+	sys.exit(r)
 
 
 
