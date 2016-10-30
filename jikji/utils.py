@@ -97,9 +97,9 @@ class Cache(AppDataUtil) :
 
 			if os.path.isfile(cpath) :
 				os.remove(cpath)
-				cprint.line('Cache "%s" is removed' % cpath)
+				cprint.line('Cache "%s" is removed' % key)
 			else :
-				cprint.error('Cache "%s" not exists' % cpath)
+				cprint.error('Cache "%s" not exists' % key)
 
 
 		else :
@@ -115,7 +115,7 @@ class Cache(AppDataUtil) :
 					os.remove(filepath)
 
 					something_removed = True
-					cprint.line('Removed: %s' % filepath)
+					cprint.line('Removed: %s' % unquote_plus(file))
 
 			if not something_removed :
 				cprint.warn('No pattern matched file with "%s"' % key)
@@ -224,6 +224,13 @@ class ImportTool() :
 				module, module_name = ImportTool.import_module(module_name, sitepath)
 				target[module_name] = module
 
+
+	@staticmethod
+	def import_items_to(target, module_name, sitepath='') :
+		module, _ = ImportTool.import_module(module_name, sitepath)
+		
+		for name, cls in module.__dict__.items() :
+			target[name] = cls
 
 
 	@staticmethod

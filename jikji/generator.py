@@ -14,12 +14,12 @@
 """
 
 import os, sys, shutil
-import ast, json
+import ast, json, codecs
 import time
 import traceback
 import xml.etree.ElementTree as ET
-
 import jinja2
+from datetime import datetime
 
 from .cprint import cprint
 from .utils import History, ImportTool
@@ -47,7 +47,8 @@ class Generator :
 		self._globar_vars['json'] = json
 		self._globar_vars['model'] = model
 
-		# Assign modules in 'config.imports' to global vars
+
+		# Assign modules in 'config.imports' to _globar_vars
 		ImportTool.assign(
 			target = self._globar_vars,
 			modules = config.imports,
@@ -63,7 +64,7 @@ class Generator :
 			lstrip_blocks = True
 		)
 		
-		# Make globals property of jinja_env to _globar_bars
+		# Make globals property of jinja_env to _globar_vars
 		self.jinja_env.globals = self._globar_vars
 
 
@@ -87,23 +88,26 @@ class Generator :
 		try :
 			pages = self.render_pages_xml( self.configpath.pages_xml )
 		
-		except ModelException as e:
-			self._finish(False, 'Model Error', e)
 
 		except jinja2.exceptions.TemplateError as e :
-			self._finish(False, 'Template Error occurs in pages.xml', e)
+			pages = []
 
-
+			cprint.warn( traceback.format_exc() )
+			cprint.sep('=', 'Template Error occurs in pages.xml', red=True, bold=True)
+			
+			self.history.close()
+			return -1
 
 
 		output_dir = self.configpath.output
-
 
 		cprint.line()
 		cprint.section('Rendering %d pages' % len(pages))
 		cprint.bold('Output in "%s"\n' % output_dir)
 
+		errors = []
 
+		# Rendering pages
 		for page in pages :
 			path = self._get_output_file_path(
 				url = page['url'],
@@ -113,23 +117,35 @@ class Generator :
 			# remove common string of output_dir in path
 			trimed_path = path[ len(output_dir) : ]
 
+			context = page['context']
+			context['_page'] = {
+				'url': page['url'],
+				'template': page['template'],
+				'render_time': datetime.now(),
+			}
+
 			try :
-				# Context is not parsed with json but ast
-				#  because in pages xml, context value is not printed with json.dumps
 				self.generate_page(
-					output_file = path,
-					context = page['context'],
+					context = context,
 					template = page['template'],
+					output_file = path,
 				)
 			
 			except jinja2.exceptions.TemplateError as e :
-				cprint.error('%s' % trimed_path )
-				self._finish(False, 'Template Error', e)
+				cprint.write('%s' % trimed_path, red=True, bold=True )
+				cprint.error(' (%s)' % e.__class__.__name__ )
+
+				errors.append({
+					'path': trimed_path,
+					'trackback': traceback.format_exc(),
+					'outer_xml': page['outer_xml']
+				})
+
+			else :
+				cprint.ok('%s' % trimed_path )
 
 
-			cprint.ok('%s' % trimed_path )
-
-
+		# Copy assets
 		for asset_dir in self.configpath.assets :
 			self._copy_asset_files(
 				asset_dir = asset_dir,
@@ -137,42 +153,28 @@ class Generator :
 			)
 
 
-		self._finish(True)
+
+		cost_time = round(time.time() - self._gen_start_time, 2)
 
 
-
-	def _finish(self, is_success, err_cause=None, err_instance=None) :
-		""" Called when generation is finished
-			If some error occurs, stop generation and exit program
-		
-		:param is_success: boolean
-		:param err_cause: If `is_success` is false, print cause of error
-		:param err_instance: jinja2.exceptions.<SomeError> or ModelException
-		"""
-
-		if is_success :
-			cprint.section('Generate completed in %s seconds' % round(time.time() - self._gen_start_time, 2), blue=True)
-			
+		if len(errors) == 0 :
+			cprint.sep('=', 'Generate completed in %s seconds' % cost_time, blue=True, bold=True)
 			self.history.log_generated_files()
 			self.history.close()
 
+			return 0
+
 		else :
-			cprint.section()
-			
-			if type(err_instance) == jinja2.exceptions.TemplateSyntaxError :
-				# Print template syntax error line and content of that line
-				cprint.error( 'jinja2.exceptions.TemplateSyntaxError: ' + err_instance.message )
-				cprint.line( '\nIn line %d:' % err_instance.lineno )
-				cprint.line( err_instance.source.splitlines()[ err_instance.lineno - 1 ].strip() )
-				cprint.line()
+			for e in errors :
+				cprint.section(e['path'], red=True)
+				cprint.line( e['outer_xml'] )
+				cprint.write( e['trackback'], yellow=True )
 
-			else :
-				traceback.print_exc()
 
-			cprint.section('Generation Stopped by ' + err_cause , red=True)
+			cprint.sep('=', '%s errors occurred on generation in %s seconds' % (len(errors), cost_time), red=True, bold=True)
 			self.history.close()
 
-			sys.exit(-1)
+			return -1
 
 		
 
@@ -195,36 +197,47 @@ class Generator :
 			self.history.log('pages.xml', rendered_xml)
 
 
-		# parse rendered pages.xml via xml.etree.ElementTree
+		# Parse rendered pages.xml via xml.etree.ElementTree
 		page_tags = ET.fromstring(rendered_xml).findall('page')
 		pages = []
 
 
 		for page in page_tags :
-			# parse context
+			# Parse context
 			ctx_tag = page.find('context')
+			outer_xml = codecs.decode(ET.tostring(page), 'unicode_escape').strip()
 
 			if ctx_tag is None :
 				ctx_dict = {}
 			else :
 				ctx_txt = ctx_tag.text.strip()
+
 				try :
+					# if type is json, parse as json
+					# else, parse by ast.literal_eval
+
 					if ctx_tag.attrib.get('type') == 'json' :
 						ctx_dict = json.loads( ctx_txt )
 					else :
 						ctx_dict = ast.literal_eval( ctx_txt )
 
 				except ValueError as e :
-					cprint.section()
-					cprint.warn(ctx_txt)
-					self._finish(False, 'ValueError occurs while parse context in pages.xml', e)
+					cprint.section('ValueError occurs while parse context in pages.xml', red=True, bold=True)
+					cprint.error(e)
+					cprint.warn(outer_xml)
+
+					ctx_dict = {
+						'type': 'ValueError',
+						'error': e
+					}
 
 
 			# append page data
 			pages.append({
-				'template': page.find('template').text.strip(),
-				'url':		page.find('url').text.strip(),
-				'context':	ctx_dict
+				'template':  page.find('template').text.strip(),
+				'url':		 page.find('url').text.strip(),
+				'context':	 ctx_dict,
+				'outer_xml': outer_xml,
 			})
 
 		return pages

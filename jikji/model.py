@@ -137,7 +137,8 @@ class Model :
 			# Generater will handle Error and stop generating
 			me = ModelException(HTTPError=e)
 			cprint.error('%s' % me.status)
-			raise me
+			#raise me
+			return me
 
 
 		if parsejson :
@@ -174,7 +175,7 @@ class Model :
 
 		result = self._rest('GET', api, data, baseurl, headers)
 
-		if immutable == True :
+		if immutable == True and isinstance(result, ModelException) == False :
 			self.cache.set(url, result)
 
 		return result
@@ -270,5 +271,16 @@ class ModelException(Exception) :
 
 		self.HTTPError = HTTPError
 		self.status = '%s %s' % (code, status_msg)
+
+
+	def __str__(self):
+		return str({
+			'type': 'jikji.ModelException',
+			'error': {
+				'status_code': self.HTTPError.response.status_code,
+				'status': self.status,
+				'HTTPError': str(self.HTTPError),
+			}
+		})
 
 
