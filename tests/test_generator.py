@@ -32,7 +32,7 @@ def test_generate1() :
 
 
 	with open('%s/index.html' % output_dir, 'r') as f : c = f.read()
-	assert c == '<p>Hello</p>'
+	assert c == '<p>Hello</p><i>home.html</i>'
 
 
 	with open('%s/README.md' % output_dir, 'r') as f: c = f.read()

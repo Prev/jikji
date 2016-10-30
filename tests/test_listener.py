@@ -23,7 +23,7 @@ def test_listener1() :
 
 
 	r = listener.response('/')
-	assert r[0] == '<p>Hello</p>'
+	assert r[0] == '<p>Hello</p><i>home.html</i>'
 
 
 	r = listener.response('/css/stylesheet.css')

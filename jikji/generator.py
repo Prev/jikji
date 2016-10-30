@@ -117,17 +117,10 @@ class Generator :
 			# remove common string of output_dir in path
 			trimed_path = path[ len(output_dir) : ]
 
-			context = page['context']
-			context['_page'] = {
-				'url': page['url'],
-				'template': page['template'],
-				'render_time': datetime.now(),
-			}
-
 			try :
 				self.generate_page(
-					context = context,
-					template = context,
+					context = page['context'],
+					template = page['template'],
 					output_file = path,
 				)
 			
@@ -232,10 +225,20 @@ class Generator :
 					}
 
 
+			template = page.find('template').text.strip()
+			url = page.find('url').text.strip()
+
+			# append meta data to context
+			ctx_dict['_page'] = {
+				'url': url,
+				'template': template,
+				'render_time': datetime.now(),
+			}
+
 			# append page data
 			pages.append({
-				'template':  page.find('template').text.strip(),
-				'url':		 page.find('url').text.strip(),
+				'template':  template,
+				'url':		 url,
 				'context':	 ctx_dict,
 				'outer_xml': outer_xml,
 			})
