@@ -127,7 +127,7 @@ class Generator :
 			try :
 				self.generate_page(
 					context = context,
-					template = page['template'],
+					template = context,
 					output_file = path,
 				)
 			

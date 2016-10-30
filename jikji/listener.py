@@ -14,6 +14,7 @@ import flask
 import jinja2
 
 from .cprint import cprint
+from . import __version__
 
 class Listener :
 
@@ -24,6 +25,7 @@ class Listener :
 		"""
 		self.app = app
 
+		cprint.line('Listening imaginary site generate with Jikji %s ' % __version__)
 
 		# Get pages by rendering pages_xml
 		cprint.section('Rendering pages.xml')
