@@ -175,7 +175,7 @@ class Model :
 
 		result = self._rest('GET', api, data, baseurl, headers)
 
-		if immutable == True :
+		if immutable == True and isinstance(result, ModelException) == False :
 			self.cache.set(url, result)
 
 		return result

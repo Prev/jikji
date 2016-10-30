@@ -18,8 +18,8 @@ import ast, json, codecs
 import time
 import traceback
 import xml.etree.ElementTree as ET
-
 import jinja2
+from datetime import datetime
 
 from .cprint import cprint
 from .utils import History, ImportTool
@@ -47,7 +47,8 @@ class Generator :
 		self._globar_vars['json'] = json
 		self._globar_vars['model'] = model
 
-		# Assign modules in 'config.imports' to global vars
+
+		# Assign modules in 'config.imports' to _globar_vars
 		ImportTool.assign(
 			target = self._globar_vars,
 			modules = config.imports,
@@ -63,7 +64,7 @@ class Generator :
 			lstrip_blocks = True
 		)
 		
-		# Make globals property of jinja_env to _globar_bars
+		# Make globals property of jinja_env to _globar_vars
 		self.jinja_env.globals = self._globar_vars
 
 
@@ -112,16 +113,22 @@ class Generator :
 				url = page['url'],
 				output_dir = output_dir
 			)
-			context = page['context']
 
 			# remove common string of output_dir in path
 			trimed_path = path[ len(output_dir) : ]
 
+			context = page['context']
+			context['_page'] = {
+				'url': page['url'],
+				'template': page['template'],
+				'render_time': datetime.now(),
+			}
+
 			try :
 				self.generate_page(
-					output_file = path,
 					context = context,
 					template = page['template'],
+					output_file = path,
 				)
 			
 			except jinja2.exceptions.TemplateError as e :
