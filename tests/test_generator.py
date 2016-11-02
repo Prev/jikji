@@ -25,7 +25,6 @@ def test_generate1() :
 	jikji.generate()
 
 
-
 	for i in range(1, 5) :
 		with open('%s/%s.html' % (output_dir, i), 'r') as f: c = f.read()
 		assert c == '<div>%s</div>' % i
@@ -33,7 +32,6 @@ def test_generate1() :
 
 	with open('%s/index.html' % output_dir, 'r') as f : c = f.read()
 	assert c == '<p>Hello</p><i>home.html</i>'
-
 
 	with open('%s/README.md' % output_dir, 'r') as f: c = f.read()
 	with open('%s/README.md' % assets_dir, 'r') as f: c2 = f.read()
@@ -50,6 +48,11 @@ def test_generate2() :
 		shutil.rmtree( output_dir )
 
 	jikji.generate()
+
+
+	with open('%s/doc/index.html' % output_dir, 'r') as f : c = f.read()
+	d = 'documentation'
+	assert c[0:len(d)] == d
 
 
 
