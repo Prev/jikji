@@ -42,7 +42,7 @@ class Listener :
 			url = self.format_url( page['url'] )
 			context = page['context']
 
-			npages[url] = ( page['template'], context )
+			npages[url] = ( context, page['template'], page['content'] )
 
 			if 'error' in context :
 				cprint.warn('/' + url)
@@ -91,13 +91,11 @@ class Listener :
 		url = self.format_url(url)
 
 		if url in self.pages :
-			template = self.pages[url][0]
-			context = self.pages[url][1]
-
 			# Render template with jinja
 			output = self.app.generator.generate_page(
-				context = context,
-				template = template,
+				context = self.pages[url][0],
+				template = self.pages[url][1],
+				content =  self.pages[url][2],
 			)
 			
 			return output, 200

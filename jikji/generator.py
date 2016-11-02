@@ -136,18 +136,12 @@ class Generator :
 			# remove common string of output_dir in path
 			trimed_path = path[ len(output_dir) : ]
 
-
-			if page['content'] and not page['template'] :
-				self._mkfile(path, page['content'])
-				cprint.okb('%s' % trimed_path )
-				continue
-
-
 			try :
 				self.generate_page(
 					context = page['context'],
 					template = page['template'],
 					output_file = path,
+					content = page['content'],
 				)
 			
 			except jinja2.exceptions.TemplateError as e :
@@ -272,13 +266,6 @@ class Generator :
 				'render_time': datetime.now(),
 			}
 
-			# append page data
-			# pages.append({
-			# 	'template':  template,
-			# 	'url':		 url,
-			# 	'context':	 ctx_dict,
-			# 	'outer_xml': outer_xml,
-			# })
 
 			obj['context'] = ctx_dict
 			pages.append(obj)
@@ -286,7 +273,7 @@ class Generator :
 		return pages
 
 
-	def generate_page(self, context, template, output_file=None) :
+	def generate_page(self, context, template, output_file=None, content=None) :
 		""" Generate page via page_obj)
 
 		:params
@@ -294,17 +281,25 @@ class Generator :
 			- template: template file path or Template Class
 			- output_file: output_file_path(url + output_dir) (string)
 				if None, do not make file (default)
+			- content: content of file (if context is None, using this)
 		
 		"""
 
 
 		# render with jinja template
-		jtpl = self.jinja_env.get_template(template)
+		if template is None and content is not None:
+			output = content
+		else :
+			jtpl = self.jinja_env.get_template(template)
+			output = jtpl.render( context )
 
-		output = jtpl.render( context )
 
 		if output_file is not None :
-			self._mkfile(output_file, output)
+			# if dictionary not exists, make dirs
+			os.makedirs( os.path.dirname(output_file), exist_ok=True )
+
+			with open(output_file, 'w') as file:
+				file.write(output)
 
 		return output
 
