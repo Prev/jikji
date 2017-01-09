@@ -69,6 +69,25 @@ class Generator :
 
 
 
+	def _get_output_file_path(self, url, output_dir) :
+		""" Get full path of output
+		"""
+		if url[-1] == '/' : url += 'index.html'
+		if url[0] == '/' : url = url[1:]
+		
+		return output_dir + '/' + url
+
+
+	def _mkfile(self, path, content) :
+		""" write file and if dictionary not exists, make dirs
+		"""
+		os.makedirs( os.path.dirname(path), exist_ok=True )
+
+		with open(path, 'w') as file:
+			file.write(content)
+
+
+
 	def generate(self) :
 		""" Generate pages
 			Read pages.xml, render with jinja2, parse rendered file, and create static web pages.
@@ -122,6 +141,7 @@ class Generator :
 					context = page['context'],
 					template = page['template'],
 					output_file = path,
+					content = page['content'],
 				)
 			
 			except jinja2.exceptions.TemplateError as e :
@@ -196,9 +216,11 @@ class Generator :
 
 
 		for page in page_tags :
+			obj = {}
+
 			# Parse context
 			ctx_tag = page.find('context')
-			outer_xml = codecs.decode(ET.tostring(page), 'unicode_escape').strip()
+			obj['outer_xml'] = codecs.decode(ET.tostring(page), 'unicode_escape').strip()
 
 			if ctx_tag is None :
 				ctx_dict = {}
@@ -217,7 +239,7 @@ class Generator :
 				except ValueError as e :
 					cprint.section('ValueError occurs while parse context in pages.xml', red=True, bold=True)
 					cprint.error(e)
-					cprint.warn(outer_xml)
+					cprint.warn(obj['outer_xml'])
 
 					ctx_dict = {
 						'type': 'ValueError',
@@ -225,38 +247,33 @@ class Generator :
 					}
 
 
-			template = page.find('template').text.strip()
-			url = page.find('url').text.strip()
+			template_tag = page.find('template')
+			if template_tag is not None :	obj['template'] = template_tag.text.strip()
+			else :							obj['template'] = None
 
+			content_tag = page.find('content')
+			if content_tag is not None :	obj['content'] = content_tag.text.strip()
+			else :							obj['content'] = None
+
+
+			obj['url'] = page.find('url').text.strip()
+
+			
 			# append meta data to context
 			ctx_dict['_page'] = {
-				'url': url,
-				'template': template,
+				'url': obj['url'],
+				'template': obj['template'],
 				'render_time': datetime.now(),
 			}
 
-			# append page data
-			pages.append({
-				'template':  template,
-				'url':		 url,
-				'context':	 ctx_dict,
-				'outer_xml': outer_xml,
-			})
+
+			obj['context'] = ctx_dict
+			pages.append(obj)
 
 		return pages
 
 
-	def _get_output_file_path(self, url, output_dir) :
-		""" Get full path of output
-		"""
-		if url[-1] == '/' : url += 'index.html'
-		if url[0] == '/' : url = url[1:]
-		
-		return output_dir + '/' + url
-
-
-
-	def generate_page(self, context, template, output_file=None) :
+	def generate_page(self, context, template, output_file=None, content=None) :
 		""" Generate page via page_obj)
 
 		:params
@@ -264,14 +281,18 @@ class Generator :
 			- template: template file path or Template Class
 			- output_file: output_file_path(url + output_dir) (string)
 				if None, do not make file (default)
+			- content: content of file (if context is None, using this)
 		
 		"""
 
 
 		# render with jinja template
-		jtpl = self.jinja_env.get_template(template)
+		if template is None and content is not None:
+			output = content
+		else :
+			jtpl = self.jinja_env.get_template(template)
+			output = jtpl.render( context )
 
-		output = jtpl.render( context )
 
 		if output_file is not None :
 			# if dictionary not exists, make dirs

@@ -37,4 +37,12 @@
 		</context>
 		<template>template2.html</template>
 	</page>
+
+	<page>
+		<url>/doc/</url>
+		<content>
+			documentation
+			{{ datetime.now() }}
+		</content>
+	</page>
 </site>
