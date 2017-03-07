@@ -21,6 +21,8 @@ class Jikji :
 	def __init__(self, sitepath) :
 		self.sitepath = sitepath
 		self.config = Config(sitepath)
+		self.generator = Generator(self.config)
+
 
 		cprint.line('using jikji %s' % __version__)
 		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.config.sitepath))
@@ -43,11 +45,9 @@ class Jikji :
 		cprint.section('Generate Pages in Views')
 		gen_start_time = time.time()
 
-		generator = Generator(self.config)
-		generator.generate()
+		self.generator.generate()
 		
-
 		cost_time = round(time.time() - gen_start_time, 2)
-
 		cprint.sep('=', 'Generate completed in %s seconds' % cost_time, blue=True, bold=True)
+
 

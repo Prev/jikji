@@ -1,7 +1,7 @@
 """
 	jikji/generator
 	----------------
-	Static Page Renderer
+	Static Page Generator
 	
 	:author Prev(prevdev@gmail.com)
 """
@@ -36,14 +36,13 @@ class Generator :
 		"""
 
 		for view in View.getviews() :
-
 			for page in view.pages :
 				cprint.write(page.geturl() + ' ')
 
 				output = self.generate_page(
 					template_path = view.template_path,
 					context = page.getcontext(),
-					output_file = self.urltopath(page.geturl(), self.config.path['output'])
+					output_url = page.geturl(),
 				)
 
 				cprint.line('finish', green=True)
@@ -60,13 +59,13 @@ class Generator :
 
 
 
-	def generate_page(self, template_path, context=None, output_file=None, content=None) :
+	def generate_page(self, template_path, context=None, output_url=None, content=None) :
 		""" Generate page
 
 		:params
 			- template_path: template file path
 			- context: context dict of template (string)
-			- output_file: output_file_path(url + output_dir) (string)
+			- output_url: output file url (string)
 				if None, do not make file (default)
 			- content: content of file (if context is None, using this)
 		
@@ -80,11 +79,12 @@ class Generator :
 			output = jtpl.render( context )
 
 
-		if output_file is not None :
+		if output_url is not None :
 			# if dictionary not exists, make dirs
+			output_file = self.urltopath(output_url, self.config.path['output'])
 			os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
-			with open(output_file, 'w') as file:
+			with open(output_url, 'w') as file:
 				file.write(output)
 
 		return output

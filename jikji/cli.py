@@ -11,7 +11,7 @@ import sys
 import click
 
 from .app import Jikji
-#from .listener import Listener
+from .listener import Listener
 
 
 cli_help = """\
@@ -53,6 +53,24 @@ def generate_command(ctx) :
 	
 	sys.exit(r)
 
+
+"""
+Open listening server for develop
+Usage:
+	jikji <sitepath> listen
+
+"""
+@cli.command('listen')
+@click.option('--host', '-h', default='0.0.0.0')
+@click.option('--port', '-p', default=7000)
+@click.pass_context
+def listen_command(ctx, host, port) :
+	""" Generate static site
+	"""
+	app = ctx.obj['APP']
+
+	listener = Listener(app)
+	listener.listen(host=host, port=port)
 
 
 
