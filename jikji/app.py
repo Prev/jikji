@@ -8,55 +8,46 @@
 """
 
 import os
-
-from .config import Config
-from .model import Model
-from .generator import Generator
-from .utils import Cache
-from .cprint import cprint
-
+import time
 from . import __version__
+from . import utils
+from .cprint import cprint
+from .generator import Generator
+from .view import View
+from .config import Config
 
 class Jikji :
 
-	def __init__(self, config_path) :
-		self._conf = Config( config_path )
-		self._cache = Cache(self._conf.sitepath)
+	def __init__(self, sitepath) :
+		self.sitepath = sitepath
+		self.config = Config(sitepath)
 
-		self._model = Model(
-			server_info = self._conf.server_info,
-			cache = self._cache
-		)
+		cprint.line('using jikji %s' % __version__)
+		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.config.sitepath))
+		cprint.section('Load Views from pages.py')
 
-		self._generator = Generator(
-			config = self._conf,
-			model = self._model
-		)
+		m = utils.load_module('pages', sitepath)
 
-	@property
-	def config(self) :
-		return self._conf
+		for view in View.getviews() :
+			#cprint.line("%s\t[%d pages]\t%s" % (view.id, len(view.pages), view.url_rule))
 
+			cprint.write(view.id, green=True)
+			cprint.line("\t[%d pages]\t%s" % (len(view.pages), view.url_rule))
+			view.find_callee(sitepath)
 
-	@property
-	def model(self) :
-		return self._model
+		cprint.line('')
 
-
-	@property
-	def cache(self) :
-		return self._cache
-
-	@property
-	def generator(self) :
-		return self._generator
 
 
 	def generate(self) :
-		""" Generate static website
-		"""
-		cprint.line('Using Jikji %s ' % __version__)
-		
-		return self._generator.generate()
+		cprint.section('Generate Pages in Views')
+		gen_start_time = time.time()
 
+		generator = Generator(self.config)
+		generator.generate()
+		
+
+		cost_time = round(time.time() - gen_start_time, 2)
+
+		cprint.sep('=', 'Generate completed in %s seconds' % cost_time, blue=True, bold=True)
 
