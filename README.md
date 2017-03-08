@@ -23,13 +23,8 @@ $ pip install jikji
 $ jikji <my_site> generate
 ```
 
-## template engine
-`jikji` use [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
-You can see jinja template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/).
 
-  
-
-# Open server for testing
+## Open server for testing
 You don't have to generate all the time after modify template.  
 `Jikji` has useful function to develop in realtime
 
@@ -45,5 +40,10 @@ Then you can see rendered website in your browser (default: http://localhost:700
 Web server opened with [Flask](http://flask.pocoo.org/), and when you reload the website, jikji will re-rendering template.
 
 
+## template engine
+`jikji` use [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
+You can see jinja template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/).
+
+  
 
 

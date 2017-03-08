@@ -17,6 +17,7 @@ class Config :
 		self.path = {
 			'template' : os.path.join(sitepath, 'template'),
 			'output' : os.path.join(sitepath, 'output'),
+			'static': os.path.join(sitepath, 'static')
 		}
 
 

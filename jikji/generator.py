@@ -6,7 +6,7 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-import os
+import os, shutil
 import jinja2
 
 from .cprint import cprint
@@ -46,7 +46,12 @@ class Generator :
 				)
 
 				cprint.line('finish', green=True)
-	
+		
+		self._copy_static_files(
+			self.config.path['static'],
+			self.config.path['output']
+		)
+
 
 
 	def urltopath(self, url, output_dir) :
@@ -84,8 +89,47 @@ class Generator :
 			output_file = self.urltopath(output_url, self.config.path['output'])
 			os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
-			with open(output_url, 'w') as file:
+			with open(output_file, 'w') as file:
 				file.write(output)
 
 		return output
+
+
+	def _copy_static_files(self, static_dir, output_dir, dir=None) :
+		""" Copy static files in <static_dir> declared in config.json
+		
+		:params
+			- static_dir: static dir to copy
+			- output_dir: output dir that copied file will located to
+			- dir: dir path for recursively explored (if value is None, use static_dir for first call)
+		"""
+		
+		if dir is None : dir = static_dir
+		if not os.path.isdir(dir) : return
+
+		list = os.listdir(dir)
+		
+		for file in list :
+			if file[0] == '.' :
+				# continue if file is hidden
+				continue
+
+			filepath = os.path.join(dir, file)
+
+			if os.path.isdir(filepath) :
+				# if file is directory, call function recursively
+				self._copy_static_files(static_dir, output_dir, filepath)
+
+			else :
+				# filepath that common string of static_dir is removed
+				trimed_path = filepath[ len(static_dir)+1 : ] 
+				dst_path = os.path.join(output_dir, trimed_path)
+
+				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
+				shutil.copyfile(
+					src = filepath,
+					dst = dst_path
+				)
+
+				cprint.line('/%s [Asset]' % trimed_path)
 

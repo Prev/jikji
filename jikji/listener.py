@@ -7,7 +7,7 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import os
+import os, shutil
 import mimetypes
 import flask
 import jinja2
@@ -21,6 +21,7 @@ class Listener :
 		""" Init Listener instance
 		:param generator: Jikji Generator instance
 		"""
+		self.app = app
 		self.generator = app.generator
 
 	
@@ -75,6 +76,10 @@ class Listener :
 
 		if url in self.pages :
 			page = self.pages[url]
+
+			# Reload view file
+			page.view.find_callee(self.app.config.sitepath)
+
 			# Render template with jinja
 			output = self.generator.generate_page(
 				template_path = page.view.template_path,
@@ -84,6 +89,21 @@ class Listener :
 			return output, 200
 
 
+
+		# Check for static files
+		asset_path = os.path.join(self.app.config.path['static'], url)
+		if os.path.isfile(asset_path) :
+			with open(asset_path, 'rb') as file :
+				content = file.read()
+
+			type = mimetypes.guess_type(url)[0]
+			return content, 200, {'Content-type': type}
+
+
+		filename = os.path.basename(url)
+
+		if len(filename) > 0 and '.' not in filename :
+			return flask.redirect(url + '/', code=302)
 
 		return '<h1 align="center">404 NOT FOUND</h1>', 404
 		
