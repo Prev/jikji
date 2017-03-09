@@ -14,17 +14,17 @@ from .view import View
 
 class Generator :
 
-	def __init__(self, config) :
+	def __init__(self, settings) :
 		""" Constructor
-		:param config: jikji.config.Config instance
+		:param settings: settings.py module instance
 		:param model: jikji.model.Model instance
 		"""
 
-		self.config = config
+		self.settings = settings
 
 		# Init jinja2 env
 		self.jinja_env = jinja2.Environment(
-			loader = jinja2.FileSystemLoader( self.config.path['template'] ),
+			loader = jinja2.FileSystemLoader( settings.TEMPLATE_ROOT ),
 			autoescape = True,
 			trim_blocks = True,
 			lstrip_blocks = True
@@ -40,7 +40,7 @@ class Generator :
 				cprint.write(page.geturl() + ' ')
 
 				output = self.generate_page(
-					template_path = view.template_path,
+					template_path = os.path.join(view.template_path),
 					context = page.getcontext(),
 					output_url = page.geturl(),
 				)
@@ -48,8 +48,8 @@ class Generator :
 				cprint.line('finish', green=True)
 		
 		self._copy_static_files(
-			self.config.path['static'],
-			self.config.path['output']
+			self.settings.STATIC_ROOT,
+			self.settings.OUTPUT_ROOT,
 		)
 
 
@@ -86,7 +86,7 @@ class Generator :
 
 		if output_url is not None :
 			# if dictionary not exists, make dirs
-			output_file = self.urltopath(output_url, self.config.path['output'])
+			output_file = self.urltopath(output_url, self.settings.OUTPUT_ROOT)
 			os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
 			with open(output_file, 'w') as file:
@@ -96,7 +96,7 @@ class Generator :
 
 
 	def _copy_static_files(self, static_dir, output_dir, dir=None) :
-		""" Copy static files in <static_dir> declared in config.json
+		""" Copy static files in <STATIC_PATH> declared in settings
 		
 		:params
 			- static_dir: static dir to copy

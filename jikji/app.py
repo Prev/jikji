@@ -14,30 +14,36 @@ from . import utils
 from .cprint import cprint
 from .generator import Generator
 from .view import View
-from .config import Config
 
 class Jikji :
 
 	def __init__(self, sitepath) :
-		self.sitepath = sitepath
-		self.config = Config(sitepath)
-		self.generator = Generator(self.config)
-
 
 		cprint.line('using jikji %s' % __version__)
-		cprint.bold('Start generating "%s"\n' % os.path.abspath(self.config.sitepath))
+		cprint.bold('Init jikji application "%s"\n' % os.path.abspath(sitepath))
+	
+
+		# Load settings file		
+		self.settings = utils.load_module(os.path.join(sitepath, 'settings.py'))
+
+
+		# Load pages config file
 		cprint.section('Load Views from pages.py')
+		utils.load_module(self.settings.PAGES)
 
-		m = utils.load_module('pages', sitepath)
 
+		# Init views
 		for view in View.getviews() :
-			#cprint.line("%s\t[%d pages]\t%s" % (view.id, len(view.pages), view.url_rule))
-
 			cprint.write(view.id, green=True)
 			cprint.line("\t[%d pages]\t%s" % (len(view.pages), view.url_rule))
-			view.find_callee(sitepath)
+
+			view.init_viewmodel(self.settings)
+
 
 		cprint.line('')
+
+		# Init generator
+		self.generator = Generator(self.settings)
 
 
 

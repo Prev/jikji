@@ -8,6 +8,7 @@
 """
 
 import os
+from datetime import datetime
 from . import utils
 
 
@@ -54,20 +55,18 @@ class View() :
 		self.pages.append(Page(self, params))
 
 
-	def find_callee(self, sitepath) :
-		tmp = ('view-models.' + self.id).split('.')
+	def init_viewmodel(self, settings) :
+		tmp = self.id.split('.')
 
-		path = os.path.join(*tmp[0:-2])
-		path = os.path.join(sitepath, path)
+		path = os.path.join(*tmp[0:-1])
+		path = os.path.join(settings.VIEWMODEL_ROOT, path + '.py')
 
-		module = utils.load_module(
-			module_name = tmp[-2],
-			path = path
-		)
+
+		module = utils.load_module(path)
 		function_name = tmp[-1]
 
-		self.callee = module.__dict__[ function_name ]
-		return self.callee
+		self.viewmodel = module.__dict__[ function_name ]
+		return self.viewmodel
 
 
 class Page :
@@ -77,7 +76,17 @@ class Page :
 
 
 	def getcontext(self) :
-		return self.view.callee( *self.params )
+		context = self.view.viewmodel( *self.params )
+
+		if type(context) == dict :
+			# THINK: better way to provide page info?
+			context['_page'] = {
+				'url': self.geturl(),
+				'template': self.view.template_path,
+				'render_time': datetime.now(),
+			}
+
+		return context
 
 
 	def geturl(self) :

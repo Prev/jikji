@@ -77,8 +77,8 @@ class Listener :
 		if url in self.pages :
 			page = self.pages[url]
 
-			# Reload view file
-			page.view.find_callee(self.app.config.sitepath)
+			# Reload view-model file
+			page.view.init_viewmodel(self.app.settings)
 
 			# Render template with jinja
 			output = self.generator.generate_page(
@@ -91,7 +91,8 @@ class Listener :
 
 
 		# Check for static files
-		asset_path = os.path.join(self.app.config.path['static'], url)
+		asset_path = os.path.join(self.app.settings.STATIC_ROOT, url)
+		
 		if os.path.isfile(asset_path) :
 			with open(asset_path, 'rb') as file :
 				content = file.read()
