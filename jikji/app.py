@@ -18,6 +18,8 @@ from .view import View
 class Jikji :
 
 	def __init__(self, sitepath) :
+		""" Initialize Jikji Application
+		"""
 
 		cprint.line('using jikji %s' % __version__)
 		cprint.bold('Init jikji application "%s"\n' % os.path.abspath(sitepath))
@@ -39,8 +41,8 @@ class Jikji :
 
 			view.init_viewmodel(self.settings)
 
-
 		cprint.line('')
+
 
 		# Init generator
 		self.generator = Generator(self.settings)
@@ -48,6 +50,8 @@ class Jikji :
 
 
 	def generate(self) :
+		""" Generate Application
+		"""
 		cprint.section('Generate Pages in Views')
 		gen_start_time = time.time()
 

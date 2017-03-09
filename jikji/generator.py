@@ -11,6 +11,7 @@ import jinja2
 
 from .cprint import cprint
 from .view import View
+from . import utils
 
 class Generator :
 
@@ -29,7 +30,27 @@ class Generator :
 			trim_blocks = True,
 			lstrip_blocks = True
 		)
+
+
+		self.assign_settings()
+
+
+	def assign_settings(self) :
+		""" Assign functions in settings to generator
+		"""
+		# Load filters if exists
+		if hasattr(self.settings, 'FILTERS') :
+			for name, cls in utils.load_module(self.settings.FILTERS).__dict__.items() :
+				self.jinja_env.filters[name] = cls
+
+
+		# Load globals if exists
+		if hasattr(self.settings, 'GLOBALS') :
+			for name, cls in utils.load_module(self.settings.GLOBALS).__dict__.items() :
+				self.jinja_env.globals[name] = cls
 	
+
+
 
 	def generate(self) :
 		""" Generate pages from views

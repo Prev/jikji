@@ -19,7 +19,7 @@ class Listener :
 
 	def __init__(self, app) :
 		""" Init Listener instance
-		:param generator: Jikji Generator instance
+		:param app: Jikji Application instance
 		"""
 		self.app = app
 		self.generator = app.generator
@@ -76,6 +76,10 @@ class Listener :
 
 		if url in self.pages :
 			page = self.pages[url]
+
+
+			# Reload settings of generator
+			self.generator.assign_settings()
 
 			# Reload view-model file
 			page.view.init_viewmodel(self.app.settings)

@@ -8,13 +8,14 @@
 
 
 def load_module(file_path) :
+	""" Load python module by file path
+	"""
 	import os, sys, importlib
 	
 	module_name = os.path.basename(file_path)
 	if module_name[-3:] == '.py' :
 		module_name = module_name[:-3]
-		
-	#path = os.path.join(path, module_name + '.py')
+
 
 	if sys.version_info >= (3, 5) :
 		# For python 3.5+
