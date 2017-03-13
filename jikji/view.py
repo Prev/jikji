@@ -148,6 +148,6 @@ class Page :
 		url = self.view.url_rule
 
 		for index, param in enumerate(self.params) :
-			url = url.replace('$%d' % (index+1), param)
+			url = url.replace('$%d' % (index+1), str(param))
 
 		return url
