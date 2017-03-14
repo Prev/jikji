@@ -120,13 +120,21 @@ class Jikji :
 		""" Register view to application
 		"""
 
-		v = View(
-			id = View.parse_id(view_func, self.settings.VIEW_ROOT),
-			view_func = view_func,
-			url_rule = url_rule,
-		)
-
-		self.views[v.id] = v
+		viewid = View.parse_id(view_func, self.settings.VIEW_ROOT)
+		
+		if viewid not in self.views :
+			# Add view if not exists
+			self.views[viewid] = View(
+				id = viewid,
+				view_func = view_func,
+				url_rule = url_rule,
+			)
+		else :
+			# Update view if exists
+			v = self.views[viewid]
+			v.view_func = view_func
+			if url_rule is not None :
+				v.url_rule = url_rule
 
 
 

@@ -33,7 +33,7 @@ from datetime import datetime
 from . import utils
 
 
-_meta_stack = []
+_processing_page_stack = []
 
 
 def view(param, url_rule=None) :
@@ -56,13 +56,13 @@ def view(param, url_rule=None) :
 		return app.views[param]
 
 
-def meta() :
+def nowpage() :
 	""" Get meta info of now-processing template
 	"""
-	global _meta_stack
-	if len(_meta_stack) == 0:
+	global _processing_page_stack
+	if len(_processing_page_stack) == 0:
 		return None
-	return _meta_stack[-1]
+	return _processing_page_stack[-1]
 
 
 
@@ -76,10 +76,10 @@ def render_template(template_path, context=None) :
 		context = {}
 
 	context['_page'] = {
- 		'url': meta()['page'].geturl(),
+ 		'url': nowpage().geturl(),
  		'template': template_path,
  		'render_time': datetime.now(),
- 		'params': meta()['page'].params,
+ 		'params': nowpage().params,
 	}
 
 	tpl = app.jinja_env.get_template(template_path)
@@ -152,11 +152,11 @@ class Page :
 	def getcontent(self) :
 		""" Get content of page
 		"""
-		global _meta_stack, meta
+		global _processing_page_stack
 
-		_meta_stack.append({'page': self, 'view': self.view})
+		_processing_page_stack.append(self)
 		rv = self.view.view_func(*self.params)
-		_meta_stack.pop()
+		_processing_page_stack.pop()
 
 		return rv
 

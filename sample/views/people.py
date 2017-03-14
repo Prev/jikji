@@ -1,6 +1,6 @@
 # people.py
 
-from jikji.view import render_template, view, meta
+from jikji.view import render_template, view
 
 
 @view
