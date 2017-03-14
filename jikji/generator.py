@@ -7,7 +7,6 @@
 """
 
 import os, shutil
-import jinja2
 
 from .cprint import cprint
 from .view import View
@@ -23,32 +22,6 @@ class Generator :
 
 		self.settings = settings
 
-		# Init jinja2 env
-		self.jinja_env = jinja2.Environment(
-			loader = jinja2.FileSystemLoader( settings.TEMPLATE_ROOT ),
-			autoescape = True,
-			trim_blocks = True,
-			lstrip_blocks = True
-		)
-
-
-		self.assign_settings()
-
-
-	def assign_settings(self) :
-		""" Assign functions in settings to generator
-		"""
-		# Load filters if exists
-		if hasattr(self.settings, 'FILTERS') :
-			for name, cls in utils.load_module(self.settings.FILTERS).__dict__.items() :
-				self.jinja_env.filters[name] = cls
-
-
-		# Load globals if exists
-		if hasattr(self.settings, 'GLOBALS') :
-			for name, cls in utils.load_module(self.settings.GLOBALS).__dict__.items() :
-				self.jinja_env.globals[name] = cls
-	
 
 
 
@@ -60,10 +33,10 @@ class Generator :
 			for page in view.pages :
 				cprint.write(page.geturl() + ' ')
 
-				output = self.generate_page(
-					template_path = os.path.join(view.template_path),
-					context = page.getcontext(),
-					output_url = page.geturl(),
+				self.create_output_file(
+					content = page.getcontent(),
+					url = page.geturl(),
+					output_root = self.settings.OUTPUT_ROOT,
 				)
 
 				cprint.line('finish', green=True)
@@ -85,43 +58,31 @@ class Generator :
 
 
 
-	def generate_page(self, template_path, context=None, output_url=None, content=None) :
-		""" Generate page
 
+	def create_output_file(self, content, url, output_root) :
+		""" Create output file
 		:params
-			- template_path: template file path
-			- context: context dict of template (string)
-			- output_url: output file url (string)
-				if None, do not make file (default)
-			- content: content of file (if context is None, using this)
+			- content: content of file
+			- url: url of page
+			- output_root: root directory of output
 		
 		"""
 
-		# render with jinja template
-		if template_path is None and content is not None:
-			output = content
-		else :
-			jtpl = self.jinja_env.get_template(template_path)
-			output = jtpl.render( context )
+		# if dictionary not exists, make dirs
+		output_file = self.urltopath(url, output_root)
+		os.makedirs( os.path.dirname(output_file), exist_ok=True )
+
+		with open(output_file, 'w') as file:
+			file.write(content)
+		
 
 
-		if output_url is not None :
-			# if dictionary not exists, make dirs
-			output_file = self.urltopath(output_url, self.settings.OUTPUT_ROOT)
-			os.makedirs( os.path.dirname(output_file), exist_ok=True )
-
-			with open(output_file, 'w') as file:
-				file.write(output)
-
-		return output
-
-
-	def _copy_static_files(self, static_dir, output_dir, dir=None) :
+	def _copy_static_files(self, static_dir, output_root, dir=None) :
 		""" Copy static files in <STATIC_PATH> declared in settings
 		
 		:params
 			- static_dir: static dir to copy
-			- output_dir: output dir that copied file will located to
+			- output_root: output root dir that copied file will located to
 			- dir: dir path for recursively explored (if value is None, use static_dir for first call)
 		"""
 		
@@ -139,12 +100,12 @@ class Generator :
 
 			if os.path.isdir(filepath) :
 				# if file is directory, call function recursively
-				self._copy_static_files(static_dir, output_dir, filepath)
+				self._copy_static_files(static_dir, output_root, filepath)
 
 			else :
 				# filepath that common string of static_dir is removed
 				trimed_path = filepath[ len(static_dir)+1 : ] 
-				dst_path = os.path.join(output_dir, trimed_path)
+				dst_path = os.path.join(output_root, trimed_path)
 
 				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
 				shutil.copyfile(

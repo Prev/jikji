@@ -22,7 +22,7 @@ class Listener :
 		:param app: Jikji Application instance
 		"""
 		self.app = app
-		self.generator = app.generator
+		# self.generator = app.generator
 
 	
 		# merge pages to one variable in each views
@@ -69,7 +69,7 @@ class Listener :
 
 	def response(self, url='') :
 		""" Response content from url
-			If url exists in pages.xml data, render template in realtime and return output
+			If url exists in pages, render template in realtime and return output
 			Else, Find files in assets dir.
 		"""
 		url = self.format_url(url)
@@ -79,16 +79,13 @@ class Listener :
 
 
 			# Reload settings of generator
-			self.generator.assign_settings()
+			# self.generator.assign_settings()
 
 			# Reload view-model file
-			page.view.init_viewmodel(self.app.settings)
+			# page.view.init_viewmodel(self.app.settings)
 
-			# Render template with jinja
-			output = self.generator.generate_page(
-				template_path = page.view.template_path,
-				context = page.getcontext()
-			)
+
+			output = page.getcontent()
 			
 			return output, 200
 

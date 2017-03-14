@@ -1,20 +1,25 @@
 # people.py
 
-def index(group_name, people_name) :
-	#url = 'http://api.memento.live/people/%s/%s' % (group_name, people_name)
-	#context = requests.get(url)
+from jikji.view import render_template, view, meta
 
+
+@view
+def index(group_name, people_name) :
 	context = {
 		'group': group_name,
 		'name': people_name,
 		'id': '%s-%s' % (group_name, people_name)
 	}
 
-	return context
+	return render_template('people.html', context)
 
+
+@view
 def comment(group_name, people_name) :
-	return {
+	context = {
 		'id': '%s-%s' % (group_name, people_name),
 		'comments': ['Test Comment']
 	}
+
+	return render_template('people_comment.html', context)
 
