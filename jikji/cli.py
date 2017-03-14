@@ -11,6 +11,7 @@ import sys
 import click
 
 from .app import Jikji
+from .generator import Generator
 from .listener import Listener
 
 

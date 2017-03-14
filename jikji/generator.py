@@ -14,13 +14,12 @@ from . import utils
 
 class Generator :
 
-	def __init__(self, settings) :
+	def __init__(self, app) :
 		""" Constructor
-		:param settings: settings.py module instance
-		:param model: jikji.model.Model instance
+		:param app: Jikji application instance
 		"""
 
-		self.settings = settings
+		self.app = app
 
 
 
@@ -29,21 +28,22 @@ class Generator :
 		""" Generate pages from views
 		"""
 
-		for view in View.getviews() :
+		for view in self.app.getviews() :
 			for page in view.pages :
 				cprint.write(page.geturl() + ' ')
 
 				self.create_output_file(
 					content = page.getcontent(),
 					url = page.geturl(),
-					output_root = self.settings.OUTPUT_ROOT,
+					output_root = self.app.settings.OUTPUT_ROOT,
 				)
 
 				cprint.line('finish', green=True)
 		
+
 		self._copy_static_files(
-			self.settings.STATIC_ROOT,
-			self.settings.OUTPUT_ROOT,
+			self.app.settings.STATIC_ROOT,
+			self.app.settings.OUTPUT_ROOT,
 		)
 
 

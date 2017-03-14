@@ -22,12 +22,10 @@ class Listener :
 		:param app: Jikji Application instance
 		"""
 		self.app = app
-		# self.generator = app.generator
-
 	
 		# merge pages to one variable in each views
 		npages = {}
-		for view in View.getviews() :
+		for view in app.getviews() :
 			for page in view.pages :
 				url = self.format_url( page.geturl() )
 				npages[url] = page
@@ -78,12 +76,8 @@ class Listener :
 			page = self.pages[url]
 
 
-			# Reload settings of generator
-			# self.generator.assign_settings()
-
-			# Reload view-model file
-			# page.view.init_viewmodel(self.app.settings)
-
+			# TODO: Reload settings of generator
+			# TODO: Reload view file
 
 			output = page.getcontent()
 			

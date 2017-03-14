@@ -64,21 +64,15 @@ class Jikji :
 		self.views = {}
 		self._load_module_recursive( self.settings.VIEW_ROOT )
 
-
-
 		# Load init scripts
 		for file in self.settings.INIT_SCRIPTS :
 			utils.load_module(file)
 
 
-		for view in View.getviews() :
+		# Print View info
+		for view in self.getviews() :
 		 	cprint.write(view.id, green=True)
 		 	cprint.line("\t[%d pages]\t%s" % (len(view.pages), view.url_rule))
-
-
-		# Init generator
-		self.generator = Generator(self.settings)
-
 
 
 
@@ -115,14 +109,36 @@ class Jikji :
 
 
 
-	def generate(self) :
+	def getviews(self) :
+		""" Get all views
+		"""
+		return list(self.views.values())
 
+
+
+	def register_view(self, view_func, url_rule=None) :
+		""" Register view to application
+		"""
+
+		v = View(
+			id = View.parse_id(view_func, self.settings.VIEW_ROOT),
+			view_func = view_func,
+			url_rule = url_rule,
+		)
+
+		self.views[v.id] = v
+
+
+
+	def generate(self) :
 		""" Generate Application
 		"""
+		generator = Generator(self)
+
 		cprint.section('Generate Pages in Views')
 		gen_start_time = time.time()
 
-		self.generator.generate()
+		generator.generate()
 		
 		cost_time = round(time.time() - gen_start_time, 2)
 		cprint.sep('=', 'Generate completed in %s seconds' % cost_time, blue=True, bold=True)

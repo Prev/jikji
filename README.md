@@ -2,7 +2,7 @@
 [![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi)
 [![Build Status](https://travis-ci.org/Prev/jikji.svg?branch=2.0)](https://travis-ci.org/Prev/jikji)  
 
-Static website generator adapting View-ViewModel Pattern 
+Static website generator adapting View Pattern 
 
 
 

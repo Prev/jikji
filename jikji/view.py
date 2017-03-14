@@ -39,10 +39,12 @@ _meta_stack = []
 def view(param, url_rule=None) :
 	""" Decorate view(param is function) or find view(param is str)
 	"""
+	from .app import Jikji
+	app = Jikji.getinstance()
 
 	if callable(param) :
 		func = param
-		View.create_view(func, url_rule)
+		app.register_view(func, url_rule)
 
 		def wrapper(*args, **kwargs):
 			return func(*args, **kwargs)
@@ -51,18 +53,15 @@ def view(param, url_rule=None) :
 
 	elif type(param) == str :
 		# Get View by id
-
-		return View.getview(param)
+		return app.views[param]
 
 
 def meta() :
 	""" Get meta info of now-processing template
 	"""
 	global _meta_stack
-
 	if len(_meta_stack) == 0:
 		return None
-
 	return _meta_stack[-1]
 
 
@@ -89,45 +88,6 @@ def render_template(template_path, context=None) :
 
 
 class View() :
-
-	@staticmethod
-	def getviews() :
-		""" Get all views
-		"""
-
-		from .app import Jikji
-		app = Jikji.getinstance()
-
-		return list(app.views.values())
-
-
-	@staticmethod
-	def getview(viewid) :
-		""" Find view by id
-		"""
-		from .app import Jikji
-		app = Jikji.getinstance()
-
-		return app.views[viewid]
-
-
-	@staticmethod
-	def create_view(view_func, url_rule=None) :
-		""" Add view to application
-		"""
-
-		from .app import Jikji
-		app = Jikji.getinstance()
-
-		v = View(
-			id = View.parse_id(view_func, app.settings.VIEW_ROOT),
-			view_func = view_func,
-			url_rule = url_rule,
-		)
-
-		app.views[v.id] = v
-		#print('View created: "%s"' % v.id)
-
 
 	@staticmethod
 	def parse_id(view_func, basepath) :

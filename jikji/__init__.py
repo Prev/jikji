@@ -10,4 +10,4 @@
 
 __version__ = '2.0.0-beta'
 
-#from jikji.app import Jikji
+from jikji.app import Jikji
