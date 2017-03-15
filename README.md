@@ -7,9 +7,9 @@ Static website generator adapting View Pattern
 
 
 ## What's different
-In common static website generator like [Jekyll](https://jekyllrb.com/),   it transform **plain text** like mardown to html.
+In common static website generator like [Jekyll](https://jekyllrb.com/),   it transforms **plain text** like mardown to html.
 
-Jekyll is blog-friendly generator, but `jikji` is general-purpose static website generator communicate with **DBMS** or **RESTFul API Server**.
+Jekyll is blog-friendly generator, but `Jikji` is general-purpose static website generator that communicates with **DBMS** or **RESTFul API Server**.
 
 
 ## Install
@@ -25,7 +25,7 @@ $ jikji <my_site> generate
 
 
 ## Open server for testing
-You don't have to generate all the time after modify template.  
+You don't have to generate all the time after modifying template.  
 `Jikji` has useful function to develop in realtime
 
 Run jikji as __listening__ mode
@@ -37,11 +37,11 @@ $ jikji <my_site> listen --port PORT --host HOST
 
 Then you can see rendered website in your browser (default: http://localhost:7000)
 
-Web server opened with [Flask](http://flask.pocoo.org/), and when you reload the website, jikji will re-rendering template.
+When you reload the website running with [Flask](http://flask.pocoo.org/), jikji will do re-rendering the template.
 
 
 ## Template engine
-`jikji` use [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
+`Jikji` uses [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
 You can see jinja template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/).
 
   
