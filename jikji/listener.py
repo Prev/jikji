@@ -12,6 +12,7 @@ import mimetypes
 import flask
 import jinja2
 
+from . import utils
 from .cprint import cprint
 from .view import View
 
@@ -22,17 +23,16 @@ class Listener :
 		:param app: Jikji Application instance
 		"""
 		self.app = app
-		self.generator = app.generator
-
 	
 		# merge pages to one variable in each views
 		npages = {}
-		for view in View.getviews() :
+		for view in app.getviews() :
 			for page in view.pages :
 				url = self.format_url( page.geturl() )
 				npages[url] = page
 
 		self.pages = npages
+
 
 
 	def listen(self, port, host) :
@@ -67,29 +67,27 @@ class Listener :
 		return url
 
 
+
 	def response(self, url='') :
 		""" Response content from url
-			If url exists in pages.xml data, render template in realtime and return output
+			If url exists in pages, render template in realtime and return output
 			Else, Find files in assets dir.
 		"""
 		url = self.format_url(url)
 
+
 		if url in self.pages :
 			page = self.pages[url]
 
-
 			# Reload settings of generator
-			self.generator.assign_settings()
+			self.app._load_settings_to_jinja_env()
 
-			# Reload view-model file
-			page.view.init_viewmodel(self.app.settings)
+			# Reload view file
+			import inspect
+			module = inspect.getmodule(page.view.view_func)
+			utils.load_module( module.__file__ )
 
-			# Render template with jinja
-			output = self.generator.generate_page(
-				template_path = page.view.template_path,
-				context = page.getcontext()
-			)
-			
+			output = page.getcontent()
 			return output, 200
 
 
