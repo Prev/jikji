@@ -12,3 +12,4 @@ dist/
 .jikji*
 .jikji
 /sample/output
+/tests/*/output

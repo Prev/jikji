@@ -12,7 +12,14 @@ import pytest
 from jikji import Jikji
 
 
-def test_app() :
+def test_app0() :
 	jikji = Jikji('sample')
-	jikji.generate()
 
+
+def test_app1() :
+	jikji = Jikji('tests/testapp1')
+
+
+def test_app2() :
+	jikji = Jikji('tests/testapp2')
+	

@@ -1,0 +1,17 @@
+{% extends "layout/default.html" %}
+
+{% block title %}Hello{% endblock %}
+
+
+{% block content %}
+<h1>{{ name }}</h1>
+<a href="{{ url }}">Go github</a>
+<div>generated in {{ datetime.now().strftime('%Y-%m-%d %H:%M:%S') }}</div>
+<div>test: {{ myfunction(7, 3) }}</div>
+
+{% endblock %}
+
+
+{% block footer %}
+copyright prevdev@gmail.com
+{% endblock %}
