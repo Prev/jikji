@@ -5,7 +5,7 @@ ROOT_PATH = os.path.dirname(__file__)
 
 
 # Absolute directory path includes Template files
-TEMPLATE_ROOT = ROOT_PATH + '/template'
+TEMPLATE_ROOT = ROOT_PATH + '/templates'
 
 # Directory that includes Static files (to copied to output)
 STATIC_ROOT = ROOT_PATH + '/static'

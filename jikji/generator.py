@@ -72,8 +72,13 @@ class Generator :
 		output_file = self.urltopath(url, output_root)
 		os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
-		with open(output_file, 'w') as file:
-			file.write(content)
+		if type(content) == str :
+			with open(output_file, 'w') as file:
+				file.write(content)
+
+		else :
+			with open(output_file, 'wb') as file:
+				file.write(content)
 		
 
 

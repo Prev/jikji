@@ -36,15 +36,28 @@ from . import utils
 _processing_page_stack = []
 
 
-def view(param, url_rule=None) :
+def view(param=None, url_rule=None) :
 	""" Decorate view(param is function) or find view(param is str)
 	"""
 	from .app import Jikji
 	app = Jikji.getinstance()
 
+
+	if url_rule :
+		def decorator(func) :
+			app.register_view(func, url_rule)
+			
+			def wrapper(*args, **kwargs):
+				return func(*args, **kwargs)
+
+			return wrapper
+
+		return decorator
+
+
 	if callable(param) :
 		func = param
-		app.register_view(func, url_rule)
+		app.register_view(func)
 
 		def wrapper(*args, **kwargs):
 			return func(*args, **kwargs)

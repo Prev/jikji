@@ -124,17 +124,22 @@ class Jikji :
 		
 		if viewid not in self.views :
 			# Add view if not exists
-			self.views[viewid] = View(
+			v = View(
 				id = viewid,
 				view_func = view_func,
 				url_rule = url_rule,
 			)
+			self.views[viewid] = v
+
 		else :
 			# Update view if exists
 			v = self.views[viewid]
 			v.view_func = view_func
+
 			if url_rule is not None :
 				v.url_rule = url_rule
+
+		return v
 
 
 

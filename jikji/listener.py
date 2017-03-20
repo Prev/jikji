@@ -74,7 +74,7 @@ class Listener :
 			Else, Find files in assets dir.
 		"""
 		url = self.format_url(url)
-
+		type = mimetypes.guess_type(url)[0]
 
 		if url in self.pages :
 			page = self.pages[url]
@@ -87,8 +87,14 @@ class Listener :
 			module = inspect.getmodule(page.view.view_func)
 			utils.load_module( module.__file__ )
 
+
 			output = page.getcontent()
-			return output, 200
+			headers = {}
+
+			if type is not None :
+				headers['Content-type'] = type
+
+			return output, 200, headers
 
 
 
@@ -99,7 +105,7 @@ class Listener :
 			with open(asset_path, 'rb') as file :
 				content = file.read()
 
-			type = mimetypes.guess_type(url)[0]
+			
 			return content, 200, {'Content-type': type}
 
 
