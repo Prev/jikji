@@ -7,7 +7,7 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import os
+import os, sys
 import time
 import jinja2
 
@@ -59,14 +59,19 @@ class Jikji :
 		self._load_settings_to_jinja_env()
 
 
+		# Add application dir to sys path
+		sys.path.append(self.settings.ROOT_PATH)
+
+
 		# Load view files
 		cprint.section('Load views and init scripts')
 		self.views = {}
 		self._load_module_recursive( self.settings.VIEW_ROOT )
 
+
 		# Load init scripts
 		for file in self.settings.INIT_SCRIPTS :
-			utils.load_module(file)
+			utils.load_module(file, self.settings.ROOT_PATH)
 
 
 		# Print View info
@@ -104,7 +109,7 @@ class Jikji :
 				self._load_module_recursive(fullpath)
 
 			elif os.path.splitext(filepath)[1] == '.py' :
-				utils.load_module(fullpath)
+				utils.load_module(fullpath, self.settings.ROOT_PATH)
 
 
 

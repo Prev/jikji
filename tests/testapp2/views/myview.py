@@ -1,4 +1,5 @@
 from jikji.view import render_template, view
+from models import mymodel
 
 @view
 def home() :
@@ -10,6 +11,7 @@ def profile(name, siteurl) :
 	return render_template('profile.html', {
 		'name': name,
 		'siteurl': siteurl,
+		'model': mymodel,
 	})
 
 
