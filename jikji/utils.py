@@ -35,6 +35,7 @@ def load_module(file_path, basepath=None) :
 		module = importlib.util.module_from_spec(spec)
 
 		sys.modules[sys_module_name] = module
+		sys.modules[module_name] = module
 		spec.loader.exec_module(module)
 		
 
