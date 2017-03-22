@@ -7,7 +7,7 @@ Static website generator based on RESTFul Server
   
 
 ## What's different
-In common static website generator like [Jekyll](https://jekyllrb.com/),   it transform **plain text** like mardown to html.
+In common static website generator like [Jekyll](https://jekyllrb.com/),   it transform **plain text** like markdown to html.
 
   
 
