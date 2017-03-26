@@ -39,7 +39,10 @@ class Listener :
 		""" Start listening HTTP server with Flask
 		"""
 		cprint.section('Listening %s pages' % len(self.pages))
-		for url in self.pages :
+		for index, url in enumerate(self.pages) :
+			if index > 20 :
+				cprint.line('...')
+				break
 			cprint.line('/' + url)
 
 		cprint.section('Open Local Server with Flask (%d pages)' % len(self.pages))

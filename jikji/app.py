@@ -75,9 +75,17 @@ class Jikji :
 
 
 		# Print View info
+		max_printing_size = 0
 		for view in self.getviews() :
-		 	cprint.write(view.id, green=True)
-		 	cprint.line("\t[%d pages]\t%s" % (len(view.pages), view.url_rule))
+			max_printing_size = max(
+				max_printing_size,
+				len(view.id) + len(str(len(view.pages)))
+			)
+
+		for view in self.getviews() :
+			spaces = " " * (max_printing_size - (len(view.id) + len(str(len(view.pages)))) + 3)
+			cprint.write(view.id, green=True)
+			cprint.line(" [%d pages]%s%s" % (len(view.pages), spaces, view.url_rule))
 
 
 
