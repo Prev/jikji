@@ -3,16 +3,18 @@ from models import mymodel
 
 @view
 def home() :
-	return render_template('home.html')
+	return render_template('home')
 
 
 @view
 def profile(name, siteurl) :
-	return render_template('profile.html', {
-		'name': name,
-		'siteurl': siteurl,
-		'model': mymodel,
-	})
+	return render_template('profile.html',
+		data={
+			'name': name,
+			'siteurl': siteurl,
+		},
+		model=mymodel,
+	)
 
 
 @view

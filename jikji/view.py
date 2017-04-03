@@ -79,14 +79,15 @@ def nowpage() :
 
 
 
-def render_template(template_path, context=None) :
+def render_template(template_path, **context) :
 	""" Render template and return result
 	"""
 	from .app import Jikji
 	app = Jikji.getinstance()
+	
 
-	if context is None :
-		context = {}
+	if os.path.splitext(template_path)[1] == '' :
+		template_path += '.html'
 
 	context['_page'] = {
  		'url': nowpage().geturl(),

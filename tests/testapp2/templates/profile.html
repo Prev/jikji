@@ -4,8 +4,8 @@
 
 
 {% block content %}
-<h1>{{ name }}</h1>
-<a href="{{ url }}">Go github</a>
+<h1>{{ data.name }}</h1>
+<a href="{{ data.url }}">Go github</a>
 <div>generated in {{ datetime.now().strftime('%Y-%m-%d %H:%M:%S') }}</div>
 <div>test: {{ myfunction(7, 3) }}</div>
 <div>test2: {{ model.rand() }}</div>
