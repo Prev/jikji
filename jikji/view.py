@@ -69,6 +69,18 @@ def view(param=None, url_rule=None) :
 		return app.views[param]
 
 
+def virtualview(func) :
+	""" Decorate virtualview
+	"""
+	from .app import Jikji
+	app = Jikji.getinstance()
+
+
+	app.register_virtualview(func)
+
+	return func
+
+
 def nowpage() :
 	""" Get meta info of now-processing template
 	"""
@@ -184,3 +196,20 @@ class Page :
 			url = url.replace('$%d' % (index+1), str(param))
 
 		return url
+
+
+
+class VirtualView(View) :
+	def __init__(self, id, virtualview_func, options=None) :
+		View.__init__(self, id, None, None, options)
+
+		self.vview_func = virtualview_func
+
+	
+	def adddata(self, data) :
+		for item in self.vview_func(data) :
+			v = view(item[0])
+			params = item[1:]
+
+			self.pages.append( Page(v, params) )
+

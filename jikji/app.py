@@ -15,7 +15,7 @@ from . import __version__
 from . import utils
 from .cprint import cprint
 from .generator import Generator
-from .view import View
+from .view import View, VirtualView
 
 class Jikji :
 
@@ -85,7 +85,13 @@ class Jikji :
 		for view in self.getviews() :
 			spaces = " " * (max_printing_size - (len(view.id) + len(str(len(view.pages)))) + 3)
 			cprint.write(view.id, green=True)
-			cprint.line(" [%d pages]%s%s" % (len(view.pages), spaces, view.url_rule))
+			cprint.write(" [%d pages]%s" % (len(view.pages), spaces))
+
+			if type(view) == VirtualView :
+				cprint.line('<Virtual View>', blue=True, bold=True)
+			else :
+				cprint.line(view.url_rule)
+				#cprint.line(" [%d pages]%s%s" % (len(view.pages), spaces, view.url_rule))
 
 
 
@@ -154,6 +160,17 @@ class Jikji :
 
 		return v
 
+
+	def register_virtualview(self, virtualview_func) :
+		""" Register virtual view to application
+		"""
+		viewid = View.parse_id(virtualview_func, self.settings.VIEW_ROOT)
+
+		v = VirtualView(
+			id = viewid,
+			virtualview_func = virtualview_func,
+		)
+		self.views[viewid] = v
 
 
 	def generate(self) :
