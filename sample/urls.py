@@ -1,4 +1,4 @@
-from jikji.view import view
+from jikji import getview
 
 # url_rules = {}
 
@@ -6,5 +6,5 @@ from jikji.view import view
 # url_rules['people.comment'] = '/$1/$2/comment'
 
 
-view('people.index').url_rule = '/$1/$2/'
-view('people.comment').url_rule = '/$1/$2/comment/'
+getview('people.index').url_rule = '/$1/$2/'
+getview('people.comment').url_rule = '/$1/$2/comment/'

@@ -1,8 +1,8 @@
 # people.py
 
-from jikji.view import render_template, view
+from jikji import render_template, register_view
 
 
-@view
+@register_view
 def test(param1) :
-	return {}
+	return "None"

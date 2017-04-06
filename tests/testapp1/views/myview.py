@@ -1,5 +1,5 @@
-from jikji.view import render_template, view
+from jikji import render_template, register_view
 
-@view(url_rule='/$1.html')
+@register_view(url_rule='/$1.html')
 def myview(num) :
 	return render_template('template1.html', n=num)

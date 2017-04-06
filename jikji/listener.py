@@ -26,10 +26,9 @@ class Listener :
 	
 		# merge pages to one variable in each views
 		npages = {}
-		for view in app.getviews() :
-			for page in view.pages :
-				url = self.format_url( page.geturl() )
-				npages[url] = page
+		for page in app.pages :
+			url = self.format_url( page.geturl() )
+			npages[url] = page
 
 		self.pages = npages
 

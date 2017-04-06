@@ -28,17 +28,16 @@ class Generator :
 		""" Generate pages from views
 		"""
 
-		for view in self.app.getviews() :
-			for page in view.pages :
-				cprint.write(page.geturl() + ' ')
+		for page in self.app.pages :
+			cprint.write(page.geturl() + ' ')
 
-				self.create_output_file(
-					content = page.getcontent(),
-					url = page.geturl(),
-					output_root = self.app.settings.OUTPUT_ROOT,
-				)
+			self.create_output_file(
+				content = page.getcontent(),
+				url = page.geturl(),
+				output_root = self.app.settings.OUTPUT_ROOT,
+			)
 
-				cprint.line('finish', green=True)
+			cprint.line('finish', green=True)
 		
 
 		self._copy_static_files(

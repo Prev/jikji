@@ -29,53 +29,34 @@
 import inspect
 import os
 from datetime import datetime
-#from .app import Jikji
 from . import utils
 
 
 _processing_page_stack = []
 
 
-def view(param=None, url_rule=None) :
-	""" Decorate view(param is function) or find view(param is str)
+
+def register_view(func=None, url_rule=None) :
+	""" Register view to app
+		Decorator function used in views/~.py
 	"""
 	from .app import Jikji
 	app = Jikji.getinstance()
 
 
-	if url_rule :
+	if not func and url_rule :
 		def decorator(func) :
 			app.register_view(func, url_rule)
-			
-			def wrapper(*args, **kwargs):
-				return func(*args, **kwargs)
-
-			return wrapper
+			return func
 
 		return decorator
 
-
-	if callable(param) :
-		func = param
+	elif callable(func) :
 		app.register_view(func)
+		return func
 
-		def wrapper(*args, **kwargs):
-			return func(*args, **kwargs)
-
-		return wrapper
-
-	elif type(param) == str :
-		# Get View by id
-		return app.views[param]
-
-
-def nowpage() :
-	""" Get meta info of now-processing template
-	"""
-	global _processing_page_stack
-	if len(_processing_page_stack) == 0:
-		return None
-	return _processing_page_stack[-1]
+	else :
+		raise Exception('Error using view decorator')
 
 
 
@@ -98,6 +79,18 @@ def render_template(template_path, **context) :
 
 	tpl = app.jinja_env.get_template(template_path)
 	return tpl.render( context )
+
+
+
+
+
+def nowpage() :
+	""" Get meta info of now-processing template
+	"""
+	global _processing_page_stack
+	if len(_processing_page_stack) == 0:
+		return None
+	return _processing_page_stack[-1]
 
 
 
@@ -140,15 +133,15 @@ class View() :
 		self.view_func = view_func
 		self.url_rule = url_rule
 		self.options = options
-		self.pages = []
+		#self.pages = []
 
 
 
-	def addpage(self, *params) :
-		""" Add page to View
-		:param *params: Data Param in View's URL Rule ($1, $2, $3)
-		"""
-		self.pages.append(Page(self, params))
+	# def addpage(self, *params) :
+	# 	""" Add page to View
+	# 	:param *params: Data Param in View's URL Rule ($1, $2, $3)
+	# 	"""
+	# 	self.pages.append(Page(self, params))
 
 
 

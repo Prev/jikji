@@ -1,9 +1,9 @@
-from jikji.view import view
+from jikji import addpage
 
 
-view('myview.home').addpage()
+addpage(view='myview.home')
 
-view('myview.profile').addpage('Prev', 'https://github.com/Prev')
-view('myview.profile').addpage('^_^', 'http://google.com')
+addpage(view='myview.profile', params=('Prev', 'https://github.com/Prev'))
+addpage(view='myview.profile', params=('^_^', 'http://google.com'))
 
-view('myview.requirements').addpage()
+addpage(view='myview.requirements', params=())
