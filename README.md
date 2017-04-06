@@ -1,8 +1,9 @@
 # Jikji
-[![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi)
+[![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi/jikji)
 [![Build Status](https://travis-ci.org/Prev/jikji.svg?branch=2.0)](https://travis-ci.org/Prev/jikji)  
+[![Python Versions](https://img.shields.io/pypi/pyversions/jikji.svg)](https://pypi.python.org/pypi/jikji)
 
-Static website generator adapting View Pattern 
+Static website generator adapting View-Page Pattern 
 
 
 

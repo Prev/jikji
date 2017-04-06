@@ -29,7 +29,7 @@ class Generator :
 		"""
 
 		for page in self.app.pages :
-			cprint.write(page.geturl() + ' ')
+			cprint.write(page.geturl() + '\r')
 
 			self.create_output_file(
 				content = page.getcontent(),
@@ -37,7 +37,8 @@ class Generator :
 				output_root = self.app.settings.OUTPUT_ROOT,
 			)
 
-			cprint.line('finish', green=True)
+			cprint.line(page.geturl(), green=True)
+			#cprint.line('finish', green=True)
 		
 
 		self._copy_static_files(

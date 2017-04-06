@@ -18,7 +18,7 @@
 
 	
 	For example, 'Article View' has url rule '/posts/$1/$2'
-	The sample pages for 'Article View' will have the following.
+	The sample PAGEs for 'Article View' will have the following.
 
 	/posts/dev/best-sublime-text-3-themes-of-2016
 	/posts/dev/the-best-news-from-angulars-ng-conf
@@ -26,8 +26,7 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import inspect
-import os
+import inspect, os
 from datetime import datetime
 from . import utils
 
@@ -44,16 +43,16 @@ def register_view(func=None, url_rule=None) :
 	app = Jikji.getinstance()
 
 
-	if not func and url_rule :
+	if callable(func) :
+		app.register_view(view_func=func)
+		return func
+
+	elif not func and url_rule :
 		def decorator(func) :
-			app.register_view(func, url_rule)
+			app.register_view(view_func=func, url_rule=url_rule)
 			return func
 
 		return decorator
-
-	elif callable(func) :
-		app.register_view(func)
-		return func
 
 	else :
 		raise Exception('Error using view decorator')
@@ -133,25 +132,21 @@ class View() :
 		self.view_func = view_func
 		self.url_rule = url_rule
 		self.options = options
-		#self.pages = []
-
-
-
-	# def addpage(self, *params) :
-	# 	""" Add page to View
-	# 	:param *params: Data Param in View's URL Rule ($1, $2, $3)
-	# 	"""
-	# 	self.pages.append(Page(self, params))
 
 
 
 class Page :
 	def __init__(self, view, params) :
 		""" Page Constructor
-		:param view: Target View
-					 View and Page are mapped in 1:n relationship
+		:param view: Target View (if string, find view in app)
 		:param params: Params of Page inserted in url rule
 		"""
+
+		if type(view) == str :
+			from .app import Jikji
+			app = Jikji.getinstance()
+			view = app.getview(view)
+
 		self.view = view
 		self.params = params
 
