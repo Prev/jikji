@@ -23,11 +23,13 @@ class Generator :
 
 
 
-
 	def generate(self) :
 		""" Generate pages from views
 		"""
 		for pg in self.app.pagegroups :
+
+			pg.before_rendered()
+
 			for page in pg.getpages() :
 				cprint.write(page.geturl() + '\r')
 
@@ -38,6 +40,8 @@ class Generator :
 				)
 
 				cprint.line(page.geturl(), green=True)
+
+			pg.after_rendered()
 		
 
 		self._copy_static_files(

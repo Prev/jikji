@@ -35,6 +35,8 @@ def addpage(page=None, view=None, params=[]) :
 
 
 def addpagegroup(pagegroup) :
+	""" Add PageGroup to app
+	"""
 	Jikji.getinstance().pagegroups.append(pagegroup)
 
 
@@ -53,7 +55,6 @@ class Jikji :
 		'settings',
 		'jinja_env',
 		'views',
-		'pages',
 		'pagegroups',
 		'generator',
 	]
@@ -72,7 +73,6 @@ class Jikji :
 		# Assign self to single-ton instance
 		Jikji.instance = self
 
-		# self.pages = []
 		self.pagegroups = []
 
 
@@ -107,19 +107,6 @@ class Jikji :
 		# Load init scripts
 		for file in self.settings.INIT_SCRIPTS :
 			utils.load_module(file, self.settings.ROOT_PATH)
-
-
-
-		# Print viewgroups
-		# tmp = {}
-		# for vg in self.viewgroups :
-		# 	cname = vg.__class__.__name__
-			
-		# 	if cname in tmp : 	tmp[cname].append( vg )
-		# 	else : 				tmp[cname] = [ vg ]
-
-		# for cname, vg_list in tmp.items() :
-		# 	cprint.line("%s\t%d ViewGroups" % (cname, len(vg_list)), blue=True)
 
 
 

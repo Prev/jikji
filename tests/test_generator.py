@@ -67,3 +67,23 @@ def test_generate2() :
 
 
 
+
+def test_generate3() :
+	""" Testing for generating of testapp3
+	"""
+	jikji = Jikji('tests/testapp3')
+
+	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
+
+
+	if os.path.exists( OUTPUT_ROOT ) :
+		shutil.rmtree( OUTPUT_ROOT )
+
+	jikji.generate()
+
+
+	with open('%s/event/2/index.html' % OUTPUT_ROOT, 'r') as f : c = f.read()
+	assert c == '<div>Event: 2</div>'
+
+
+

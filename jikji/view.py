@@ -178,18 +178,31 @@ class Page :
 class PageGroup :
 
 	def __init__(self, page=None, pages=None) :
+		""" PageGroup Contructor
+		:param page: if page, use single-instance page list
+		:param pages: list of pages
+		"""
 		if page :
 			self.pages = [page]
 		else :
 			self.pages = pages
 
+
 	def getpages(self) :
+		""" Get pages to be generated or listened
+		"""
 		return self.pages
 
+
 	def before_rendered(self) :
+		""" Call before rendering start
+		"""
 		pass
 
+
 	def after_rendered(self) :
+		""" Call after rendering finished
+		"""
 		pass
 
 
