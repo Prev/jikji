@@ -172,3 +172,25 @@ class Page :
 			url = url.replace('$%d' % (index+1), str(param))
 
 		return url
+
+
+
+class PageGroup :
+
+	def __init__(self, page=None, pages=None) :
+		if page :
+			self.pages = [page]
+		else :
+			self.pages = pages
+
+	def getpages(self) :
+		return self.pages
+
+	def before_rendered(self) :
+		pass
+
+	def after_rendered(self) :
+		pass
+
+
+

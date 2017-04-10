@@ -27,18 +27,17 @@ class Generator :
 	def generate(self) :
 		""" Generate pages from views
 		"""
+		for pg in self.app.pagegroups :
+			for page in pg.getpages() :
+				cprint.write(page.geturl() + '\r')
 
-		for page in self.app.pages :
-			cprint.write(page.geturl() + '\r')
+				self.create_output_file(
+					content = page.getcontent(),
+					url = page.geturl(),
+					output_root = self.app.settings.OUTPUT_ROOT,
+				)
 
-			self.create_output_file(
-				content = page.getcontent(),
-				url = page.geturl(),
-				output_root = self.app.settings.OUTPUT_ROOT,
-			)
-
-			cprint.line(page.geturl(), green=True)
-			#cprint.line('finish', green=True)
+				cprint.line(page.geturl(), green=True)
 		
 
 		self._copy_static_files(

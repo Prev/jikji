@@ -14,7 +14,7 @@ setup(
 	name = 'jikji',
 	packages = ['jikji'],
 	version = version,
-	description = 'Static website generator based on RESTFul Server',
+	description = 'Python Static website generator fits well with Modern web',
 	license = 'MIT',
 
 	author = 'Youngsoo Lee',

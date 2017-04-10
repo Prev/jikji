@@ -15,7 +15,7 @@ from . import __version__
 from . import utils
 from .cprint import cprint
 from .generator import Generator
-from .view import View, Page
+from .view import View, Page, PageGroup
 
 
 def addpage(page=None, view=None, params=[]) :
@@ -28,9 +28,14 @@ def addpage(page=None, view=None, params=[]) :
 			params=params,
 		)
 
-	Jikji.getinstance().pages.append(page)
+	Jikji.getinstance().pagegroups.append(
+		PageGroup(page=page)
+	)
 	return page
 
+
+def addpagegroup(pagegroup) :
+	Jikji.getinstance().pagegroups.append(pagegroup)
 
 
 def getview(viewid) :
@@ -48,7 +53,8 @@ class Jikji :
 		'settings',
 		'jinja_env',
 		'views',
-		'page',
+		'pages',
+		'pagegroups',
 		'generator',
 	]
 
@@ -66,7 +72,8 @@ class Jikji :
 		# Assign self to single-ton instance
 		Jikji.instance = self
 
-		self.pages = []
+		# self.pages = []
+		self.pagegroups = []
 
 
 		cprint.line('using jikji %s' % __version__)
@@ -102,6 +109,20 @@ class Jikji :
 			utils.load_module(file, self.settings.ROOT_PATH)
 
 
+
+		# Print viewgroups
+		# tmp = {}
+		# for vg in self.viewgroups :
+		# 	cname = vg.__class__.__name__
+			
+		# 	if cname in tmp : 	tmp[cname].append( vg )
+		# 	else : 				tmp[cname] = [ vg ]
+
+		# for cname, vg_list in tmp.items() :
+		# 	cprint.line("%s\t%d ViewGroups" % (cname, len(vg_list)), blue=True)
+
+
+
 		# Get Max size of view-info printed
 		max_printing_size = 0
 		for view in self.getviews() :
@@ -115,6 +136,7 @@ class Jikji :
 			spaces = " " * (max_printing_size - len(view.id) + 1)
 			cprint.write(view.id, green=True)
 			cprint.line(" %s%s" % (spaces, view.url_rule))
+
 
 
 
