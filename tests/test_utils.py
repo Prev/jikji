@@ -18,7 +18,10 @@ def test_getprop() :
 	assert utils.getprop({'a': 1}, 'b') == None
 	assert utils.getprop(TestClass(), 'a') == 3
 	assert utils.getprop(TestClass(), 'b') == None
-	
+
+	assert utils.getprop({'c': {'d': 5}}, 'c.d') == 5
+	assert utils.getprop({'c': {'d': 5}}, 'c.e') == None
+
 
 def test_parse_varstr() :
 	""" Test utils.parse_varstr

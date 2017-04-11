@@ -91,7 +91,7 @@ class Listener :
 
 			# Reload view file
 			import inspect
-			module = inspect.getmodule(page.view.view_func)
+			module = inspect.getmodule(page.view.viewfunc)
 			utils.load_module(module.__file__, self.app.settings.ROOT_PATH)
 
 			output = page.getcontent()

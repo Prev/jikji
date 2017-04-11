@@ -11,7 +11,7 @@ class PeoplePageGroup(PageGroup) :
 
 	def getpages(self) :
 		return (
-			Page(view='people.index', params=self),
+			Page(view=self.index, params=self),
 			Page(view='people.comment', params=self),
 		)
 
@@ -23,7 +23,7 @@ class PeoplePageGroup(PageGroup) :
 		)
 
 
-	@register_view(url_rule='/people/{ id }/comment/')
+	@register_view(url_rule='/people/{ model.id }/comment/')
 	def comment(self) :
 		return render_template('people_comment.html',
 			id=self.model['id'],

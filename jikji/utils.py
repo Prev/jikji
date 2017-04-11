@@ -59,6 +59,15 @@ def getprop(data, property_name) :
 	:param data: Dict or Class
 	:param property_name: Name of property
 	"""
+
+	if '.' in property_name :
+		l = property_name.split('.')
+		pn = l.pop(0)
+		return getprop(
+			getprop(data, pn),
+			'.'.join(l)
+		)
+
 	try :
 		d = getattr(data, property_name)
 	except KeyError :

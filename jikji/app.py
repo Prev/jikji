@@ -134,9 +134,16 @@ class Jikji :
 
 
 
-	def getview(self, viewid) :
-		""" Get View by id
+	def getview(self, viewid=None, viewfunc=None) :
+		""" Get View by viewid or viewfunc
 		"""
+		if not viewid and not viewfunc :
+			raise Exception('You must specify either viewid or viewfunc')
+
+		if viewfunc :
+			viewid = View.parse_id(viewfunc, self.settings.VIEW_ROOT)
+
+
 		if viewid in self.views :
 			return self.views[viewid]
 		else :
@@ -144,20 +151,20 @@ class Jikji :
 
 
 
-	def register_view(self, view_func, url_rule=None) :
+	def register_view(self, viewfunc, url_rule=None) :
 		""" Register view to application
 
-			:param view_func: View function (callee of page)
+			:param viewfunc: View function (callee of page)
 			:param url_rule: URL Rule of View (You can change URL Rule with `getview` function)
 		"""
 
-		viewid = View.parse_id(view_func, self.settings.VIEW_ROOT)
+		viewid = View.parse_id(viewfunc, self.settings.VIEW_ROOT)
 		
 		if viewid not in self.views :
 			# Add view if not exists
 			v = View(
 				id = viewid,
-				view_func = view_func,
+				viewfunc = viewfunc,
 				url_rule = url_rule,
 			)
 			self.views[viewid] = v
@@ -165,7 +172,7 @@ class Jikji :
 		else :
 			# Update view if exists
 			v = self.views[viewid]
-			v.view_func = view_func
+			v.viewfunc = viewfunc
 
 			if url_rule is not None :
 				v.url_rule = url_rule
