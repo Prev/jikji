@@ -6,9 +6,13 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
+import re
 
 def load_module(file_path, basepath=None) :
 	""" Load python module by file path
+
+	:param file_path: Location of loading file
+	:param basepath: Used in Parsing module name to be put in sys.modules
 	"""
 	import os, sys, importlib
 	
@@ -46,3 +50,44 @@ def load_module(file_path, basepath=None) :
 		sys.modules[sys_module_name] = module
 
 	return module
+
+
+
+def getprop(data, property_name) :
+	""" Get property from dict or class
+
+	:param data: Dict or Class
+	:param property_name: Name of property
+	"""
+	try :
+		d = getattr(data, property_name)
+	except KeyError :
+		return None
+	except AttributeError :
+		try :
+			d = data.__getitem__(property_name)
+		except (AttributeError, KeyError) :
+			return None
+	return d
+
+
+pvs_re = re.compile(r'([^\\])({\s*([a-zA-Z0-9-_$]+)\s*})')
+
+def parse_varstr(rulestr, data) :
+	""" Parse var in string. Var data is given by dict param
+		ex) parse_varstr('/posts/{post_id}', {'post_id': 3}) // returns "/posts/3"
+
+	:param rulestr: Ruled string to be replaced
+	:param data:	Data dictionary 
+	"""
+	def pvs_callback(m) :
+		varid = m.group(3)
+		d = getprop(data, varid)
+
+		return "%s%s" % (m.group(1), d)
+
+	rv = pvs_re.sub(pvs_callback, rulestr)
+	rv = rv.replace('\\{', '{')
+	return rv
+
+

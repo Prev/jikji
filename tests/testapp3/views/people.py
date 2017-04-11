@@ -1,18 +1,30 @@
-# people.py
-
 from jikji import render_template, register_view
+from jikji.view import PageGroup, Page
 
 
-@register_view(url_rule='/people/$1/')
-def index(id) :
-	return render_template('people.html',
-		id=id,
-	)
 
 
-@register_view(url_rule='/people/$1/comment/')
-def comment(id) :
-	return render_template('people_comment.html',
-		id=id
-	)
+class PeoplePageGroup(PageGroup) :
+	def __init__(self, model) :
+		self.model = model
+		self.id = model['id']
 
+	def getpages(self) :
+		return (
+			Page(view='people.index', params=self),
+			Page(view='people.comment', params=self),
+		)
+
+
+	@register_view(url_rule='/people/{ id }/')
+	def index(self) :
+		return render_template('people.html',
+			id=self.model['id'],
+		)
+
+
+	@register_view(url_rule='/people/{ id }/comment/')
+	def comment(self) :
+		return render_template('people_comment.html',
+			id=self.model['id'],
+		)
