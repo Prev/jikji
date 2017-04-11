@@ -20,8 +20,8 @@
 	For example, 'Article View' has url rule '/posts/$1/$2'
 	The sample PAGEs for 'Article View' will have the following.
 
-	/posts/dev/best-sublime-text-3-themes-of-2016
-	/posts/dev/the-best-news-from-angulars-ng-conf
+	"/posts/dev/best-sublime-text-3-themes-of-2016"
+	"/posts/dev/the-best-news-from-angulars-ng-conf"
 
 	:author: Prev(prevdev@gmail.com)
 """

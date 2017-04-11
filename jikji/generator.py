@@ -9,7 +9,7 @@
 import os, shutil
 
 from .cprint import cprint
-from .view import View
+from .view import View, Page, PageGroup
 from . import utils
 
 class Generator :
@@ -122,4 +122,5 @@ class Generator :
 				)
 
 				cprint.line('/%s [Asset]' % trimed_path)
+
 

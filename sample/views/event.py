@@ -20,11 +20,6 @@ class EventPageGroup(PageGroup) :
 		self.id = model['id']
 
 
-	# @group_view()
-	# def comment(event_id) :
-	# 	return '<div>Event Comment: %s</div>' % event_id
-
-
 	def getpages(self) :
 		return (
 			Page(view='event.index', params=(self.id, )),
