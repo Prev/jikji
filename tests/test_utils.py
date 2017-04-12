@@ -22,6 +22,9 @@ def test_getprop() :
 	assert utils.getprop({'c': {'d': 5}}, 'c.d') == 5
 	assert utils.getprop({'c': {'d': 5}}, 'c.e') == None
 
+	assert utils.getprop(['X', 'Y', 'Z'], '$1') == 'X'
+	assert utils.getprop({'arr': ['X', 'Y', 'Z']}, 'arr.$2') == 'Y'
+
 
 def test_parse_varstr() :
 	""" Test utils.parse_varstr
@@ -42,3 +45,11 @@ def test_parse_varstr() :
 			self.a = 1
 
 	assert utils.parse_varstr('/{ a }/', data=TestClass()) == '/1/'
+
+
+	assert utils.parse_varstr('/$1/$2', data=[
+		'Category1',
+		'Article1',
+	]) == '/Category1/Article1'
+
+

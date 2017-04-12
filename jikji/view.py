@@ -144,7 +144,7 @@ class Page :
 		"""
 		from .app import Jikji
 		app = Jikji.getinstance()
-		
+
 		if type(view) == str :
 			view = app.getview(viewid=view)
 
@@ -177,15 +177,8 @@ class Page :
 		"""
 		url = self.view.url_rule
 
-		if type(self.params) in (list, tuple) :
-			# If List or Tuple, replace "$n" to param data
-			for index, param in enumerate(self.params) :
-				url = url.replace('$%d' % (index+1), str(param))
-
-		else :
-			# If dict, replace "{var_name}" to param data
-			url = utils.parse_varstr(url, self.params)
-
+		# Parse rule like "{var_name}" or "$n" from url and replace to param data
+		url = utils.parse_varstr(url, self.params)
 		return url
 
 
