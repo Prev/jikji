@@ -84,7 +84,7 @@ def getprop(data, property_name) :
 	return d
 
 
-pvs_re = re.compile(r'([^\\])({\s*([a-zA-Z0-9-_$]+)\s*})')
+pvs_re = re.compile(r'([^\\])({\s*([a-zA-Z0-9-_$\.]+)\s*})')
 pvs_re2 = re.compile(r'()()(\$[0-9]+)')
 
 def parse_varstr(rulestr, data) :
