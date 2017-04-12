@@ -14,7 +14,7 @@ setup(
 	name = 'jikji',
 	packages = ['jikji'],
 	version = version,
-	description = 'Static website generator based on RESTFul Server',
+	description = 'Python Static website generator fits well with Modern web',
 	license = 'MIT',
 
 	author = 'Youngsoo Lee',
@@ -37,6 +37,7 @@ setup(
 		'Programming Language :: Python :: 3.3',
 		'Programming Language :: Python :: 3.4',
 		'Programming Language :: Python :: 3.5',
+		'Programming Language :: Python :: 3.6',
 	),
 
 	entry_points={

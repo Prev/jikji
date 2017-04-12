@@ -9,7 +9,7 @@
 import os, shutil
 
 from .cprint import cprint
-from .view import View
+from .view import View, Page, PageGroup
 from . import utils
 
 class Generator :
@@ -23,14 +23,15 @@ class Generator :
 
 
 
-
 	def generate(self) :
 		""" Generate pages from views
 		"""
+		for pg in self.app.pagegroups :
 
-		for view in self.app.getviews() :
-			for page in view.pages :
-				cprint.write(page.geturl() + ' ')
+			pg.before_rendered()
+
+			for page in pg.getpages() :
+				cprint.write(page.geturl() + '\r')
 
 				self.create_output_file(
 					content = page.getcontent(),
@@ -38,7 +39,9 @@ class Generator :
 					output_root = self.app.settings.OUTPUT_ROOT,
 				)
 
-				cprint.line('finish', green=True)
+				cprint.line(page.geturl(), green=True)
+
+			pg.after_rendered()
 		
 
 		self._copy_static_files(
@@ -119,4 +122,5 @@ class Generator :
 				)
 
 				cprint.line('/%s [Asset]' % trimed_path)
+
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	tests.generator
 	---------------
@@ -13,6 +12,11 @@ import os
 import shutil
 from jikji import Jikji
 
+def test_generate0() :
+	jikji = Jikji('sample')
+	jikji.generate()
+
+	
 
 def test_generate1() :
 	""" Testing for generating of testapp1
@@ -59,6 +63,26 @@ def test_generate2() :
 	with open('%s/requirements.txt' % OUTPUT_ROOT, 'r') as f :
 		c = f.read()
 	assert c == 'jikji>=2.0\nrequests>=2.11'
+
+
+
+
+def test_generate3() :
+	""" Testing for generating of testapp3
+	"""
+	jikji = Jikji('tests/testapp3')
+
+	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
+
+
+	if os.path.exists( OUTPUT_ROOT ) :
+		shutil.rmtree( OUTPUT_ROOT )
+
+	jikji.generate()
+
+
+	with open('%s/event/2/index.html' % OUTPUT_ROOT, 'r') as f : c = f.read()
+	assert c == '<div>Event: 2</div>'
 
 
 

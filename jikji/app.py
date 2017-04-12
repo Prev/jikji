@@ -15,7 +15,37 @@ from . import __version__
 from . import utils
 from .cprint import cprint
 from .generator import Generator
-from .view import View
+from .view import View, Page, PageGroup
+
+
+def addpage(page=None, view=None, params=[]) :
+	""" Add page to app
+	"""
+
+	if not page :
+		page = Page(
+			view=view,
+			params=params,
+		)
+
+	Jikji.getinstance().pagegroups.append(
+		PageGroup(page=page)
+	)
+	return page
+
+
+def addpagegroup(pagegroup) :
+	""" Add PageGroup to app
+	"""
+	Jikji.getinstance().pagegroups.append(pagegroup)
+
+
+def getview(viewid) :
+	""" Get View in app by id
+	"""
+	return Jikji.getinstance().getview(viewid)
+
+
 
 class Jikji :
 
@@ -25,11 +55,14 @@ class Jikji :
 		'settings',
 		'jinja_env',
 		'views',
+		'pagegroups',
 		'generator',
 	]
 
 	@staticmethod
 	def getinstance() :
+		""" Get current Jikji app instance (single-ton)
+		"""
 		return Jikji.instance
 		
 
@@ -39,6 +72,8 @@ class Jikji :
 
 		# Assign self to single-ton instance
 		Jikji.instance = self
+
+		self.pagegroups = []
 
 
 		cprint.line('using jikji %s' % __version__)
@@ -74,50 +109,20 @@ class Jikji :
 			utils.load_module(file, self.settings.ROOT_PATH)
 
 
-		# Print View info
+
+		# Get Max size of view-info printed
 		max_printing_size = 0
 		for view in self.getviews() :
 			max_printing_size = max(
 				max_printing_size,
-				len(view.id) + len(str(len(view.pages)))
+				len(view.id)
 			)
 
+		# Print views
 		for view in self.getviews() :
-			spaces = " " * (max_printing_size - (len(view.id) + len(str(len(view.pages)))) + 3)
+			spaces = " " * (max_printing_size - len(view.id) + 1)
 			cprint.write(view.id, green=True)
-			cprint.line(" [%d pages]%s%s" % (len(view.pages), spaces, view.url_rule))
-
-
-
-
-	def _load_settings_to_jinja_env(self) :
-		""" Assign functions in settings to jinja_function
-		"""
-		# Load filters if exists
-		if hasattr(self.settings, 'FILTERS') :
-			for name, cls in utils.load_module(self.settings.FILTERS).__dict__.items() :
-				self.jinja_env.filters[name] = cls
-
-
-		# Load globals if exists
-		if hasattr(self.settings, 'GLOBALS') :
-			for name, cls in utils.load_module(self.settings.GLOBALS).__dict__.items() :
-				self.jinja_env.globals[name] = cls
-
-
-
-
-	def _load_module_recursive(self, dir) :
-		""" Load module in directory recursively
-		"""	
-		for filepath in os.listdir(dir) :
-			fullpath = os.path.join(dir, filepath)
-
-			if os.path.isdir(fullpath) :
-				self._load_module_recursive(fullpath)
-
-			elif os.path.splitext(filepath)[1] == '.py' :
-				utils.load_module(fullpath, self.settings.ROOT_PATH)
+			cprint.line(" %s%s" % (spaces, view.url_rule))
 
 
 
@@ -129,17 +134,37 @@ class Jikji :
 
 
 
-	def register_view(self, view_func, url_rule=None) :
+	def getview(self, viewid=None, viewfunc=None) :
+		""" Get View by viewid or viewfunc
+		"""
+		if not viewid and not viewfunc :
+			raise Exception('You must specify either viewid or viewfunc')
+
+		if viewfunc :
+			viewid = View.parse_id(viewfunc, self.settings.VIEW_ROOT)
+
+
+		if viewid in self.views :
+			return self.views[viewid]
+		else :
+			raise Exception('View "%s" not exists in app' % viewid)
+
+
+
+	def register_view(self, viewfunc, url_rule=None) :
 		""" Register view to application
+
+			:param viewfunc: View function (callee of page)
+			:param url_rule: URL Rule of View (You can change URL Rule with `getview` function)
 		"""
 
-		viewid = View.parse_id(view_func, self.settings.VIEW_ROOT)
+		viewid = View.parse_id(viewfunc, self.settings.VIEW_ROOT)
 		
 		if viewid not in self.views :
 			# Add view if not exists
 			v = View(
 				id = viewid,
-				view_func = view_func,
+				viewfunc = viewfunc,
 				url_rule = url_rule,
 			)
 			self.views[viewid] = v
@@ -147,7 +172,7 @@ class Jikji :
 		else :
 			# Update view if exists
 			v = self.views[viewid]
-			v.view_func = view_func
+			v.viewfunc = viewfunc
 
 			if url_rule is not None :
 				v.url_rule = url_rule
@@ -170,3 +195,32 @@ class Jikji :
 		cprint.sep('=', 'Generate completed in %s seconds' % cost_time, blue=True, bold=True)
 
 
+
+
+	def _load_settings_to_jinja_env(self) :
+		""" Assign functions in settings to jinja_function
+		"""
+		# Load filters if exists
+		if hasattr(self.settings, 'FILTERS') :
+			for name, cls in utils.load_module(self.settings.FILTERS).__dict__.items() :
+				self.jinja_env.filters[name] = cls
+
+
+		# Load globals if exists
+		if hasattr(self.settings, 'GLOBALS') :
+			for name, cls in utils.load_module(self.settings.GLOBALS).__dict__.items() :
+				self.jinja_env.globals[name] = cls
+
+
+
+	def _load_module_recursive(self, dir) :
+		""" Load module in directory recursively
+		"""	
+		for filepath in os.listdir(dir) :
+			fullpath = os.path.join(dir, filepath)
+
+			if os.path.isdir(fullpath) :
+				self._load_module_recursive(fullpath)
+
+			elif os.path.splitext(filepath)[1] == '.py' :
+				utils.load_module(fullpath, self.settings.ROOT_PATH)

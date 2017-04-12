@@ -1,25 +1,23 @@
 # people.py
 
-from jikji.view import render_template, view
+from jikji import render_template, register_view
 
 
-@view
+@register_view
 def index(group_name, people_name) :
-	context = {
-		'group': group_name,
-		'name': people_name,
-		'id': '%s-%s' % (group_name, people_name)
-	}
 
-	return render_template('people.html', context)
+	return render_template('people.html',
+		group=group_name,
+		name=people_name,
+		id='%s-%s' % (group_name, people_name)
+	)
 
 
-@view
+@register_view
 def comment(group_name, people_name) :
-	context = {
-		'id': '%s-%s' % (group_name, people_name),
-		'comments': ['Test Comment']
-	}
 
-	return render_template('people_comment.html', context)
+	return render_template('people_comment.html',
+		id='%s-%s' % (group_name, people_name),
+		comments=['Test Comment'],
+	)
 

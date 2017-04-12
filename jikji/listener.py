@@ -12,9 +12,8 @@ import mimetypes
 import flask
 import jinja2
 
-from . import utils
+from . import utils, view
 from .cprint import cprint
-from .view import View
 
 class Listener :
 
@@ -26,8 +25,8 @@ class Listener :
 	
 		# merge pages to one variable in each views
 		npages = {}
-		for view in app.getviews() :
-			for page in view.pages :
+		for pg in app.pagegroups :
+			for page in pg.getpages() :
 				url = self.format_url( page.geturl() )
 				npages[url] = page
 
@@ -79,6 +78,11 @@ class Listener :
 		url = self.format_url(url)
 		type = mimetypes.guess_type(url)[0]
 
+		headers = {}
+		if type is not None :
+			headers['Content-type'] = type
+
+
 		if url in self.pages :
 			page = self.pages[url]
 
@@ -87,16 +91,10 @@ class Listener :
 
 			# Reload view file
 			import inspect
-			module = inspect.getmodule(page.view.view_func)
+			module = inspect.getmodule(page.view.viewfunc)
 			utils.load_module(module.__file__, self.app.settings.ROOT_PATH)
 
-
 			output = page.getcontent()
-			headers = {}
-
-			if type is not None :
-				headers['Content-type'] = type
-
 			return output, 200, headers
 
 
@@ -108,8 +106,7 @@ class Listener :
 			with open(asset_path, 'rb') as file :
 				content = file.read()
 
-			
-			return content, 200, {'Content-type': type}
+			return content, 200, headers
 
 
 		filename = os.path.basename(url)
