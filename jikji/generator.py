@@ -6,52 +6,75 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-import os, shutil
+import os, shutil, traceback
+from multiprocessing import Pool
 
 from .cprint import cprint
 from .view import View, Page, PageGroup
 from . import utils
 
+
+def generate_pages(params) :
+	""" Function called by multiprocessing.Process
+
+	:param params: tuple set
+		pagegroup: PageGroup Object
+		generator: Generator Object
+	"""
+	
+	pagegroup, output_root = params
+
+	pagegroup.before_rendered()
+	success_pages = []
+	error_pages = []
+	errors = []
+
+	for page in pagegroup.getpages() :
+		url = page.geturl()
+		try :
+			content = page.getcontent()
+
+			Generator.create_output_file(
+				content = content,
+				url = url,
+				output_root = output_root,
+			)
+		except Exception as e :
+			errors.append({
+				'pagegroup': pagegroup,
+				'page': page,
+				'url': url,
+				'trackback': traceback.format_exc(),
+			})
+			error_pages.append(url)
+
+		else :
+			success_pages.append( url )
+
+
+
+	if len(error_pages) :	ctx = {'red': True}
+	else : 					ctx = {'green': True}
+
+	cprint.write(
+		pagegroup.get_printing_url() + ' (%d/%d) \n' % (len(success_pages), len(success_pages) + len(error_pages)),
+		**ctx
+	)
+
+	for e in errors :
+		cprint.section( e['url'], red=True )
+		cprint.line( e['trackback'], yellow=True )
+
+
+	pagegroup.after_rendered()
+	return success_pages, error_pages
+
+
+
 class Generator :
 
-	def __init__(self, app) :
-		""" Constructor
-		:param app: Jikji application instance
-		"""
-
-		self.app = app
-
-
-
-	def generate(self) :
-		""" Generate pages from views
-		"""
-		for pg in self.app.pagegroups :
-
-			pg.before_rendered()
-
-			for page in pg.getpages() :
-				cprint.write(page.geturl())
-
-				self.create_output_file(
-					content = page.getcontent(),
-					url = page.geturl(),
-					output_root = self.app.settings.OUTPUT_ROOT,
-				)
-
-				cprint.line('\r' + page.geturl(), green=True)
-
-			pg.after_rendered()
-		
-
-		self._copy_static_files(
-			self.app.settings.STATIC_ROOT,
-			self.app.settings.OUTPUT_ROOT,
-		)
-
-
-
-	def urltopath(self, url, output_dir) :
+	@staticmethod
+	def urltopath(url, output_dir) :
 		""" Get full path of output
 		"""
 		if url[-1] == '/' : url += 'index.html'
@@ -60,19 +83,17 @@ class Generator :
 		return output_dir + '/' + url
 
 
-
-
-	def create_output_file(self, content, url, output_root) :
+	@staticmethod
+	def create_output_file(content, url, output_root) :
 		""" Create output file
 		:params
 			- content: content of file
 			- url: url of page
 			- output_root: root directory of output
-		
 		"""
 
 		# if dictionary not exists, make dirs
-		output_file = self.urltopath(url, output_root)
+		output_file = Generator.urltopath(url, output_root)
 		os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
 		if type(content) == str :
@@ -83,6 +104,38 @@ class Generator :
 			with open(output_file, 'wb') as file:
 				file.write(content)
 		
+
+
+	def __init__(self, app) :
+		""" Constructor
+		:param app: Jikji application instance
+		"""
+		self.app = app
+
+
+	def generate(self) :
+		""" Generate pages from views
+		"""
+		processes_cnt = self.app.settings.__dict__.get('PROCESSES', 4)
+		pool = Pool(processes=4)
+
+		params = zip(self.app.pagegroups, [self.app.settings.OUTPUT_ROOT] * len(self.app.pagegroups))
+		result = pool.map(generate_pages, params)
+		
+		self._copy_static_files(
+			self.app.settings.STATIC_ROOT,
+			self.app.settings.OUTPUT_ROOT,
+		)
+
+		
+		success_cnt = 0; error_cnt = 0
+
+		for sucesses, errors in result :
+			success_cnt += len(sucesses)
+			error_cnt += len(errors)
+		
+		return (success_cnt, error_cnt)
+
 
 
 	def _copy_static_files(self, static_dir, output_root, dir=None) :
