@@ -7,10 +7,35 @@
 """
 
 import os, shutil
+from multiprocessing import Process, Queue
 
 from .cprint import cprint
 from .view import View, Page, PageGroup
 from . import utils
+
+
+def generate_pages(pagegroup, generator, mp_queue) :
+	#r = []
+
+	pagegroup.before_rendered()
+	
+	for page in pagegroup.getpages() :
+		# r.append((
+		# 	page.getcontent(),
+		# 	page.geturl(),
+		# ))
+
+		generator.create_output_file(
+			content = page.getcontent(),
+			url = page.geturl(),
+			output_root = generator.app.settings.OUTPUT_ROOT,
+		)
+
+		cprint.line(page.geturl(), green=True)
+
+	pagegroup.after_rendered()
+	#mp_queue.put(r)
+
 
 class Generator :
 
@@ -22,27 +47,34 @@ class Generator :
 		self.app = app
 
 
-
 	def generate(self) :
 		""" Generate pages from views
 		"""
+
+		mp_queue = Queue()
+		processes = []
+
 		for pg in self.app.pagegroups :
+			p = Process(target=generate_pages, args=(pg, self, mp_queue))
+			processes.append(p)
+			p.start()
 
-			pg.before_rendered()
-
-			for page in pg.getpages() :
-				cprint.write(page.geturl())
-
-				self.create_output_file(
-					content = page.getcontent(),
-					url = page.geturl(),
-					output_root = self.app.settings.OUTPUT_ROOT,
-				)
-
-				cprint.line('\r' + page.geturl(), green=True)
-
-			pg.after_rendered()
+		for p in processes :
+			p.join()
 		
+		# for p in processes :
+		# 	data = mp_queue.get()
+
+		# 	for pageinfo in data :
+
+		# 		self.create_output_file(
+		# 			content = pageinfo[0],
+		# 			url = pageinfo[1],
+		# 			output_root = self.app.settings.OUTPUT_ROOT,
+		# 		)
+		# 		cprint.line(pageinfo[1], green=True)
+
+
 
 		self._copy_static_files(
 			self.app.settings.STATIC_ROOT,

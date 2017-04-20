@@ -8,7 +8,7 @@
 
 """
 
-__version__ = '2.0.4-beta'
+__version__ = '2.0.5-beta'
 
 from jikji.app import Jikji, addpage, addpagegroup, getview
 from jikji.view import render_template, register_view
