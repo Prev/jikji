@@ -31,7 +31,7 @@ class Generator :
 			pg.before_rendered()
 
 			for page in pg.getpages() :
-				cprint.write(page.geturl() + '\r')
+				cprint.write(page.geturl())
 
 				self.create_output_file(
 					content = page.getcontent(),
@@ -39,7 +39,7 @@ class Generator :
 					output_root = self.app.settings.OUTPUT_ROOT,
 				)
 
-				cprint.line(page.geturl(), green=True)
+				cprint.line('\r' + page.geturl(), green=True)
 
 			pg.after_rendered()
 		
