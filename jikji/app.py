@@ -189,10 +189,9 @@ class Jikji :
 		cprint.section('Generate Pages in Views')
 		gen_start_time = time.time()
 
-		generator.generate()
-		
+		sucess_cnt = generator.generate()
 		cost_time = round(time.time() - gen_start_time, 2)
-		cprint.sep('=', 'Generate completed in %s seconds' % cost_time, blue=True, bold=True)
+		cprint.sep('=', '%d Pages are generated in %s seconds' % (sucess_cnt, cost_time), blue=True, bold=True)
 
 
 

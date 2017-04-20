@@ -7,83 +7,44 @@
 """
 
 import os, shutil
-from multiprocessing import Process, Queue
+from multiprocessing import Pool
 
 from .cprint import cprint
 from .view import View, Page, PageGroup
 from . import utils
 
 
-def generate_pages(pagegroup, generator, mp_queue) :
-	#r = []
+def generate_pages(params) :
+	""" Function called by multiprocessing.Process
+	:param params: tuple set
+		pagegroup: PageGroup Object
+		generator: Generator Object
+	"""
+	
+	pagegroup, output_root = params
 
 	pagegroup.before_rendered()
-	
-	for page in pagegroup.getpages() :
-		# r.append((
-		# 	page.getcontent(),
-		# 	page.geturl(),
-		# ))
+	success = 0
 
-		generator.create_output_file(
+	for page in pagegroup.getpages() :
+		Generator.create_output_file(
 			content = page.getcontent(),
 			url = page.geturl(),
-			output_root = generator.app.settings.OUTPUT_ROOT,
+			output_root = output_root,
 		)
 
-		cprint.line(page.geturl(), green=True)
+		success += 1
+		cprint.write(page.geturl() + '\n', green=True)
 
 	pagegroup.after_rendered()
-	#mp_queue.put(r)
+	return success
+
 
 
 class Generator :
 
-	def __init__(self, app) :
-		""" Constructor
-		:param app: Jikji application instance
-		"""
-
-		self.app = app
-
-
-	def generate(self) :
-		""" Generate pages from views
-		"""
-
-		mp_queue = Queue()
-		processes = []
-
-		for pg in self.app.pagegroups :
-			p = Process(target=generate_pages, args=(pg, self, mp_queue))
-			processes.append(p)
-			p.start()
-
-		for p in processes :
-			p.join()
-		
-		# for p in processes :
-		# 	data = mp_queue.get()
-
-		# 	for pageinfo in data :
-
-		# 		self.create_output_file(
-		# 			content = pageinfo[0],
-		# 			url = pageinfo[1],
-		# 			output_root = self.app.settings.OUTPUT_ROOT,
-		# 		)
-		# 		cprint.line(pageinfo[1], green=True)
-
-
-
-		self._copy_static_files(
-			self.app.settings.STATIC_ROOT,
-			self.app.settings.OUTPUT_ROOT,
-		)
-
-
-
-	def urltopath(self, url, output_dir) :
+	@staticmethod
+	def urltopath(url, output_dir) :
 		""" Get full path of output
 		"""
 		if url[-1] == '/' : url += 'index.html'
@@ -92,19 +53,17 @@ class Generator :
 		return output_dir + '/' + url
 
 
-
-
-	def create_output_file(self, content, url, output_root) :
+	@staticmethod
+	def create_output_file(content, url, output_root) :
 		""" Create output file
 		:params
 			- content: content of file
 			- url: url of page
 			- output_root: root directory of output
-		
 		"""
 
 		# if dictionary not exists, make dirs
-		output_file = self.urltopath(url, output_root)
+		output_file = Generator.urltopath(url, output_root)
 		os.makedirs( os.path.dirname(output_file), exist_ok=True )
 
 		if type(content) == str :
@@ -115,6 +74,31 @@ class Generator :
 			with open(output_file, 'wb') as file:
 				file.write(content)
 		
+
+
+	def __init__(self, app) :
+		""" Constructor
+		:param app: Jikji application instance
+		"""
+		self.app = app
+
+
+	def generate(self) :
+		""" Generate pages from views
+		"""
+		processes_cnt = self.app.settings.__dict__.get('PROCESSES', 4)
+		pool = Pool(processes=4)
+
+		params = zip(self.app.pagegroups, [self.app.settings.OUTPUT_ROOT] * len(self.app.pagegroups))
+		result = pool.map(generate_pages, params)
+		
+		self._copy_static_files(
+			self.app.settings.STATIC_ROOT,
+			self.app.settings.OUTPUT_ROOT,
+		)
+
+		return sum(result)
+
 
 
 	def _copy_static_files(self, static_dir, output_root, dir=None) :
