@@ -6,7 +6,7 @@
 	:author Prev(prevdev@gmail.com)
 """
 
-import os, shutil
+import os, shutil, traceback
 from multiprocessing import Pool
 
 from .cprint import cprint
@@ -16,6 +16,7 @@ from . import utils
 
 def generate_pages(params) :
 	""" Function called by multiprocessing.Process
+
 	:param params: tuple set
 		pagegroup: PageGroup Object
 		generator: Generator Object
@@ -24,20 +25,49 @@ def generate_pages(params) :
 	pagegroup, output_root = params
 
 	pagegroup.before_rendered()
-	success = 0
+	success_pages = []
+	error_pages = []
+	errors = []
 
 	for page in pagegroup.getpages() :
-		Generator.create_output_file(
-			content = page.getcontent(),
-			url = page.geturl(),
-			output_root = output_root,
-		)
+		url = page.geturl()
+		try :
+			content = page.getcontent()
 
-		success += 1
-		cprint.write(page.geturl() + '\n', green=True)
+			Generator.create_output_file(
+				content = content,
+				url = url,
+				output_root = output_root,
+			)
+		except Exception as e :
+			errors.append({
+				'pagegroup': pagegroup,
+				'page': page,
+				'url': url,
+				'trackback': traceback.format_exc(),
+			})
+			error_pages.append(url)
+
+		else :
+			success_pages.append( url )
+
+
+
+	if len(error_pages) :	ctx = {'red': True}
+	else : 					ctx = {'green': True}
+
+	cprint.write(
+		pagegroup.get_printing_url() + ' (%d/%d) \n' % (len(success_pages), len(success_pages) + len(error_pages)),
+		**ctx
+	)
+
+	for e in errors :
+		cprint.section( e['url'], red=True )
+		cprint.line( e['trackback'], yellow=True )
+
 
 	pagegroup.after_rendered()
-	return success
+	return success_pages, error_pages
 
 
 
@@ -97,7 +127,14 @@ class Generator :
 			self.app.settings.OUTPUT_ROOT,
 		)
 
-		return sum(result)
+		
+		success_cnt = 0; error_cnt = 0
+
+		for sucesses, errors in result :
+			success_cnt += len(sucesses)
+			error_cnt += len(errors)
+		
+		return (success_cnt, error_cnt)
 
 
 

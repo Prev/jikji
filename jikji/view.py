@@ -202,6 +202,12 @@ class PageGroup :
 		return self.pages
 
 
+	def get_printing_url(self) :
+		""" Get url to be printed on generation
+		"""
+		return self.getpages()[0].geturl()
+
+
 	def before_rendered(self) :
 		""" Call before rendering start
 		"""
