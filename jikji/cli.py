@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	Jikji/cli
 	----------------
@@ -12,7 +11,7 @@ import sys
 import click
 
 from .app import Jikji
-from .cprint import cprint
+from .generator import Generator
 from .listener import Listener
 
 
@@ -54,43 +53,6 @@ def generate_command(ctx) :
 	r = app.generate()
 	
 	sys.exit(r)
-
-
-
-"""
-Command for cache
-Usage:
-	jikji <sitepath> cache <command> [--Args] [--Options]
-
-"""
-@cli.group('cache', help="Manage Cache")
-def cache() :
-	pass
-
-@cache.command('list', short_help="Listing caches")
-@click.pass_context
-def cache_list_command(ctx) :
-	app = ctx.obj['APP']
-
-	for file in app.cache.list(details=True) :
-		print(file)
-
-
-@cache.command('clear', short_help="Remove all cache files")
-@click.pass_context
-def cache_clear_command(ctx) :
-	app = ctx.obj['APP']
-	app.cache.remove_all()
-
-@cache.command('remove', short_help="Remove cache file matched")
-@click.argument('key', metavar='<key>')
-@click.option('--regex', '-r', is_flag=True, default=False, help="Using regex match instead of string equal")
-@click.pass_context
-def cache_remove_command(ctx, key, regex) :
-	app = ctx.obj['APP']
-	app.cache.remove(key, as_pattern=regex)
-
-
 
 
 """

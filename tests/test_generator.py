@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	tests.generator
 	---------------
@@ -13,46 +12,77 @@ import os
 import shutil
 from jikji import Jikji
 
+def test_generate0() :
+	jikji = Jikji('sample')
+	jikji.generate()
+
+	
 
 def test_generate1() :
-	jikji = Jikji('tests/test_site/config1.json')
-	output_dir = jikji.config.path.output
-	assets_dir = jikji.config.path.assets[0]
+	""" Testing for generating of testapp1
+	"""
+	jikji = Jikji('tests/testapp1')
+	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
 
-	if os.path.exists( output_dir ) :
-		shutil.rmtree( output_dir )
+	if os.path.exists( OUTPUT_ROOT ) :
+		shutil.rmtree( OUTPUT_ROOT )
 
 	jikji.generate()
 
-
 	for i in range(1, 5) :
-		with open('%s/%s.html' % (output_dir, i), 'r') as f: c = f.read()
+		with open('%s/%s.html' % (jikji.settings.OUTPUT_ROOT, i), 'r') as f:
+			c = f.read()
 		assert c == '<div>%s</div>' % i
-
-
-	with open('%s/index.html' % output_dir, 'r') as f : c = f.read()
-	assert c == '<p>Hello</p><i>home.html</i>'
-
-	with open('%s/README.md' % output_dir, 'r') as f: c = f.read()
-	with open('%s/README.md' % assets_dir, 'r') as f: c2 = f.read()
-	assert c == c2
 
 
 
 
 def test_generate2() :
-	jikji = Jikji('tests/test_site/config2.json')
-	output_dir = jikji.config.path.output
+	""" Testing for generating of testapp2
+	"""
+	jikji = Jikji('tests/testapp2')
 
-	if os.path.exists( output_dir ) :
-		shutil.rmtree( output_dir )
+	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
+	STATIC_ROOT = jikji.settings.STATIC_ROOT
+
+	if os.path.exists( OUTPUT_ROOT ) :
+		shutil.rmtree( OUTPUT_ROOT )
 
 	jikji.generate()
 
 
-	with open('%s/doc/index.html' % output_dir, 'r') as f : c = f.read()
-	d = 'documentation'
-	assert c[0:len(d)] == d
+	with open('%s/index.html' % OUTPUT_ROOT, 'r') as f : c = f.read()
+	assert c == '<p>Hello</p><i>home.html</i>'
+
+
+	with open('%s/README.md' % OUTPUT_ROOT, 'r') as f: c = f.read()
+	with open('%s/README.md' % STATIC_ROOT, 'r') as f: c2 = f.read()
+	assert c == c2
+
+
+	with open('%s/requirements.txt' % OUTPUT_ROOT, 'r') as f :
+		c = f.read()
+	assert c == 'jikji>=2.0\nrequests>=2.11'
+
+
+
+
+def test_generate3() :
+	""" Testing for generating of testapp3
+	"""
+	jikji = Jikji('tests/testapp3')
+
+	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
+
+
+	if os.path.exists( OUTPUT_ROOT ) :
+		shutil.rmtree( OUTPUT_ROOT )
+
+	jikji.generate()
+
+
+	with open('%s/event/2/index.html' % OUTPUT_ROOT, 'r') as f : c = f.read()
+	assert c == '<div>Event: 2</div>'
 
 
 

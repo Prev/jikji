@@ -21,7 +21,7 @@ class cprint() :
 	_lw = None
 	_logfile = None
 
-
+	@staticmethod
 	def writers() :
 		""" Return writers that be written
 		"""

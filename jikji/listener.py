@@ -7,47 +7,28 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import os
+import os, shutil
 import mimetypes
-
 import flask
 import jinja2
 
+from . import utils, view
 from .cprint import cprint
-from . import __version__
 
 class Listener :
 
 	def __init__(self, app) :
 		""" Init Listener instance
-		:param app: Jikji app istance
-		:param pages: array of page info returned from generator:render_pages_xml
+		:param app: Jikji Application instance
 		"""
 		self.app = app
-
-		cprint.line('Listening imaginary site generate with Jikji %s ' % __version__)
-
-		# Get pages by rendering pages_xml
-		cprint.section('Rendering pages.xml')
-		pages = app.generator.render_pages_xml( app.config.path.pages_xml )
-		
-
-		cprint.section('%s pages are opened' % len(pages))
-
-
-		# change data format for pages
-		# array to dict which key is url
+	
+		# merge pages to one variable in each views
 		npages = {}
-		for page in pages :
-			url = self.format_url( page['url'] )
-			context = page['context']
-
-			npages[url] = ( context, page['template'], page['content'] )
-
-			if 'error' in context :
-				cprint.warn('/' + url)
-			else :
-				cprint.line('/' + url)
+		for pg in app.pagegroups :
+			for page in pg.getpages() :
+				url = self.format_url( page.geturl() )
+				npages[url] = page
 
 		self.pages = npages
 
@@ -56,11 +37,16 @@ class Listener :
 	def listen(self, port, host) :
 		""" Start listening HTTP server with Flask
 		"""
-		cprint.section('Open Local Server with Flask')
+		cprint.section('Listening %s pages' % len(self.pages))
+		for index, url in enumerate(self.pages) :
+			if index > 20 :
+				cprint.line('...')
+				break
+			cprint.line('/' + url)
 
+		cprint.section('Open Local Server with Flask (%d pages)' % len(self.pages))
 
 		flaskapp = flask.Flask(__name__)
-
 		flaskapp.add_url_rule('/', 'index', self.response)
 		flaskapp.add_url_rule('/<path:url>', 'response', self.response)
 		flaskapp.run(port=port, host=host)
@@ -77,41 +63,56 @@ class Listener :
 
 		if len(url) >= 1 and url[0] == '/' :
 			url = url[1:]
-		if len(url) > 1 and url[-1] == '/' :
-			url = url[0:-1]
+		# if len(url) > 1 and url[-1] == '/' :
+		# 	url = url[0:-1]
 
 		return url
 
 
+
 	def response(self, url='') :
 		""" Response content from url
-			If url exists in pages.xml data, render template in realtime and return output
+			If url exists in pages, render template in realtime and return output
 			Else, Find files in assets dir.
 		"""
 		url = self.format_url(url)
+		type = mimetypes.guess_type(url)[0]
+
+		headers = {}
+		if type is not None :
+			headers['Content-type'] = type
+
 
 		if url in self.pages :
-			# Render template with jinja
-			output = self.app.generator.generate_page(
-				context = self.pages[url][0],
-				template = self.pages[url][1],
-				content =  self.pages[url][2],
-			)
-			
-			return output, 200
+			page = self.pages[url]
+
+			# Reload settings of generator
+			self.app._load_settings_to_jinja_env()
+
+			# Reload view file
+			import inspect
+			module = inspect.getmodule(page.view.viewfunc)
+			utils.load_module(module.__file__, self.app.settings.ROOT_PATH)
+
+			output = page.getcontent()
+			return output, 200, headers
 
 
-		for assetdir in self.app.config.path.assets :
-			# Return asset if exists
-			path = os.path.join(assetdir, url)
 
-			if os.path.isfile(path) :
-				with open(path, 'rb') as file :
-					content = file.read()
+		# Check for static files
+		asset_path = os.path.join(self.app.settings.STATIC_ROOT, url)
+		
+		if os.path.isfile(asset_path) :
+			with open(asset_path, 'rb') as file :
+				content = file.read()
 
-				type = mimetypes.guess_type(url)[0]
-				return content, 200, {'Content-type': type}
+			return content, 200, headers
 
+
+		filename = os.path.basename(url)
+
+		if len(filename) > 0 and '.' not in filename :
+			return flask.redirect(url + '/', code=302)
 
 		return '<h1 align="center">404 NOT FOUND</h1>', 404
 		
