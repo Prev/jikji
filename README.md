@@ -41,10 +41,39 @@ Then you can see rendered website in your browser (default: http://localhost:700
 When you reload the website running with [Flask](http://flask.pocoo.org/), jikji will do re-rendering the template.
 
 
+## What's good
+
+- **Fast**. Jikji use multiprocessing on generation
+- **Expandability**. You can build from micro web to enterprise-class website. 
+- **Efficiency**. You can write code fastly with familiar libraries/design pattern.
+
+
 ## Template engine
 `Jikji` uses [Jinja2](http://jinja.pocoo.org) template engine which is used in [Flask](http://flask.pocoo.org/).  
 You can see jinja template documentation on [here](http://jinja.pocoo.org/docs/dev/templates/).
 
   
+## View-Page Concept
+
+Jikji has a concept `View`, which is similar to `Controller` on common backend framework
+One `View` has one 'URL rule', one 'View Function', and multiple 'Pages'.
+
+Usually, the controller has the role of taking the data from the model
+with the PARAMETERS in URL and returning the HTML with the View.
+
+In static web, PARAMETERS are provided in advance.
+There are many tuple set of parameters in ONE VIEW.
+
+Jikji calls the tuple `Page`
+
+
+For example, 'Article View' has url rule `/posts/$1/$2`
+The sample PAGEs for 'Article View' will have the following.
+
+```
+/posts/dev/best-sublime-text-3-themes-of-2016
+/posts/dev/the-best-news-from-angulars-ng-conf
+```
+
 
 
