@@ -13,53 +13,82 @@ class Publisher :
 	""" Publisher Interface
 	"""
 
-	def __init__(self, generator) :
+	def __init__(self) :
 		""" Constructor of Publisher
 		"""
-		self.generator = generator
+		pass
 	
 
-	def publish(self) :
+	def publish(self, generator, generation_result=None) :
 		""" Publish implmentation function
+		:param generator: Generator object
+		:param generation_result: Result list of generation
 		"""
 		pass
 
 
 class LocalPublisher(Publisher) :
-	""" LocalPublisher
+	""" Publish to local disk
 	"""
 	
-	def __init__(self, generator, clear_legacy=False) :
+	def __init__(self, output_root, clear_legacy=False) :
 		""" Constructor of LocalPublisher
-		:param generator: Generator object
+		:param output_root: Root directory of output files
 		:param clear_legacy: Clear legacy files in output dir if True
 		"""
-		Publisher.__init__(self, generator)
+		self.output_root = output_root
 		self.clear_legacy = clear_legacy
 
 
 
-	def publish(self) :
+	def publish(self, generator, generation_result=None) :
 		""" Publish to local output dir
 		"""
-		output_root = self.generator.app.settings.OUTPUT_ROOT
-
 		if self.clear_legacy :
-			if os.path.exists( output_root ) :
-				shutil.rmtree( output_root )
+			if os.path.exists( self.output_root ) :
+				shutil.rmtree( self.output_root )
 
 		# Copy tmp dir to output dir		
 		utils.copytree2(
-			src = self.generator.tmp_output_root,
-			dst = output_root
+			src = generator.tmp_output_root,
+			dst = self.output_root
 		)
 
 		
 
-class RestPublisher(Publisher) :
-	pass
-
-
 class S3Publisher(Publisher) :
+	""" Amazon Simple Storage Service (S3) Publisher
+		Require install & configure boto3 (https://boto3.readthedocs.io/en/latest/index.html)
+	"""
+	
+	def __init__(self, bucket) :
+		""" Constructor
+		:param bucket: Bucket name of S3
+		"""
+		self.bucket = bucket
+
+
+	def publish(self, generator, generation_result) :
+		""" Publish to S3
+		"""
+		import boto3
+		from .generator import urltopath
+		s3 = boto3.resource('s3')
+
+		for sucesses, errors in generation_result :
+			for pageurl in sucesses :
+				file = generator.get_tmp_filepath(pageurl)
+
+				s3.Object(self.bucket, urltopath(pageurl)).put(
+					Body=open(file, 'rb'),
+					ACL='public-read'	
+				)
+
+
+
+class RestPublisher(Publisher) :
+	# TODO
 	pass
+
+
 

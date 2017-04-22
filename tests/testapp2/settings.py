@@ -1,4 +1,5 @@
 import os
+from jikji.publisher import LocalPublisher
 
 # Root Path of Application
 ROOT_PATH = os.path.dirname(__file__)
@@ -13,9 +14,11 @@ STATIC_ROOT = ROOT_PATH + '/static'
 # Directory that includes View files
 VIEW_ROOT = ROOT_PATH + '/views'
 
-# Directory that rendered output will be located
+# Directory that rendered output will be locate
 OUTPUT_ROOT = ROOT_PATH + '/output'
 
+# Publisher instance used after generation
+PUBLISHER = LocalPublisher(output_root=OUTPUT_ROOT)
 
 
 

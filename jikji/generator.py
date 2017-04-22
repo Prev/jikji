@@ -10,7 +10,7 @@ import os, shutil, traceback
 from multiprocessing import Pool
 
 from .cprint import cprint
-from . import utils, publisher
+from . import utils
 
 
 def mkfile(path, content) :
@@ -28,14 +28,17 @@ def mkfile(path, content) :
 
 
 
-def urltopath(url, basedir) :
+def urltopath(url, basedir=None) :
 	""" Get full path by url and basedir
 	"""
 	
 	if url[-1] == '/' : url += 'index.html'
 	if url[0] == '/' : url = url[1:]
-		
-	return os.path.join(basedir, url)
+	
+	if basedir :
+		return os.path.join(basedir, url)
+	else :
+		return url
 
 
 
@@ -139,8 +142,8 @@ class Generator :
 
 
 		# Publish
-		pub = publisher.LocalPublisher(generator=self)
-		pub.publish()
+		publisher = self.app.settings.PUBLISHER
+		publisher.publish(generator=self, generation_result=result)
 		
 
 		success_cnt = 0; error_cnt = 0

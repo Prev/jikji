@@ -78,10 +78,16 @@ class Jikji :
 
 		cprint.line('using jikji %s' % __version__)
 		cprint.bold('Init jikji application "%s"\n' % os.path.abspath(sitepath))
-	
+		
+		# Add application dir to sys path
+		sys.path.append(sitepath)
 
 		# Load settings file		
 		self.settings = utils.load_module(os.path.join(sitepath, 'settings.py'))
+
+
+		if sitepath != self.settings.ROOT_PATH :
+			sys.path.append(self.settings.ROOT_PATH)
 
 
 		# Init jinja2 env
@@ -92,10 +98,6 @@ class Jikji :
 			lstrip_blocks = True
 		)
 		self._load_settings_to_jinja_env()
-
-
-		# Add application dir to sys path
-		sys.path.append(self.settings.ROOT_PATH)
 
 
 		# Load view files

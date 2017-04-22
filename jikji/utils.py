@@ -160,5 +160,4 @@ def copytree2(src, dst, ignore_hidden=True,
 				if callback_after :
 					callback_after(trimed_path, filepath)
 				
-				#cprint.line('/%s [Asset]' % trimed_path)
 
