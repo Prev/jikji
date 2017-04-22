@@ -214,10 +214,11 @@ class PageGroup :
 		pass
 
 
-	def after_rendered(self) :
+	def after_rendered(self, success_pages, errors) :
 		""" Call after rendering finished
 		"""
 		pass
+
 
 
 

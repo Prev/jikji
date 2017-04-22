@@ -2,13 +2,13 @@ from jikji import render_template, register_view
 from jikji.view import PageGroup, Page
 
 
-@register_view(url_rule='/event/$1')
+@register_view(url_rule='/event/$1/')
 def index(event_id) :
 	return '<div>Event: %s</div>' % event_id
 
 
 
-@register_view(url_rule='/event/comment/$1')
+@register_view(url_rule='/event/comment/$1/')
 def comment(event_id) :
 	return '<div>Event Comment: %s</div>' % event_id
 
@@ -30,5 +30,5 @@ class EventPageGroup(PageGroup) :
 	def before_rendered(self) :
 		pass
 
-	def after_rendered(self) :
+	def after_rendered(self, success_pages, errors) :
 		pass

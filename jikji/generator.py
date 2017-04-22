@@ -10,100 +10,94 @@ import os, shutil, traceback
 from multiprocessing import Pool
 
 from .cprint import cprint
-from .view import View, Page, PageGroup
-from . import utils
+from . import utils, publisher
 
 
-def generate_pages(params) :
-	""" Function called by multiprocessing.Process
+def mkfile(path, content) :
+	""" Create output file
+	:param path: filepath of destination
+	:param content: content of file
+	"""
 
-	:param params: tuple set
-		pagegroup: PageGroup Object
-		generator: Generator Object
+	# if dictionary not exists, make dirs
+	os.makedirs( os.path.dirname(path), exist_ok=True )
+
+	filemode = (type(content) == str) and 'w' or 'wb'
+	with open(path, filemode) as file:
+		file.write(content)
+
+
+
+def urltopath(url, basedir) :
+	""" Get full path by url and basedir
 	"""
 	
-	pagegroup, output_root = params
+	if url[-1] == '/' : url += 'index.html'
+	if url[0] == '/' : url = url[1:]
+		
+	return os.path.join(basedir, url)
+
+
+
+def generate_work(pagegroup) :
+	""" Function called by multiprocessing.Process
+	:param pagegroup: PageGroup Object
+	"""
+
+	success_pages = []; errors = []
+	generator = Generator.getinstance()
 
 	pagegroup.before_rendered()
-	success_pages = []
-	error_pages = []
-	errors = []
 
 	for page in pagegroup.getpages() :
 		url = page.geturl()
 		try :
 			content = page.getcontent()
+			path = generator.get_tmp_filepath(url)
+			mkfile(path=path, content=content)
 
-			Generator.create_output_file(
-				content = content,
-				url = url,
-				output_root = output_root,
-			)
+			success_pages.append(url)
+
 		except Exception as e :
 			errors.append({
 				'pagegroup': pagegroup,
 				'page': page,
 				'url': url,
 				'trackback': traceback.format_exc(),
+				'exception': e,
 			})
-			error_pages.append(url)
-
-		else :
-			success_pages.append( url )
 
 
-
-	if len(error_pages) :	ctx = {'red': True}
-	else : 					ctx = {'green': True}
-
+	kwarg = len(errors) and {'red': True} or {'green': True}
 	cprint.write(
-		pagegroup.get_printing_url() + ' (%d/%d) \n' % (len(success_pages), len(success_pages) + len(error_pages)),
-		**ctx
+		pagegroup.get_printing_url() + ' (%d/%d) \n' % (len(success_pages), len(success_pages) + len(errors)),
+		**kwarg
 	)
 
+	if len(errors) and generator.app.settings.__dict__.get('ATOMIC_PAGEGROUP', False):
+		# If setting has `ATOMIC_PAGEGROUP` option, only publish none-error PageGroups
+		for p in success_pages :
+			os.remove(p)
+
+
+	pagegroup.after_rendered(success_pages, errors)
+
 	for e in errors :
+		# Display errors if exists
 		cprint.section( e['url'], red=True )
 		cprint.line( e['trackback'], yellow=True )
 
-
-	pagegroup.after_rendered()
-	return success_pages, error_pages
-
+	return success_pages, errors
+		
 
 
 class Generator :
 
-	@staticmethod
-	def urltopath(url, output_dir) :
-		""" Get full path of output
-		"""
-		if url[-1] == '/' : url += 'index.html'
-		if url[0] == '/' : url = url[1:]
-		
-		return output_dir + '/' + url
-
+	instance = None
 
 	@staticmethod
-	def create_output_file(content, url, output_root) :
-		""" Create output file
-		:params
-			- content: content of file
-			- url: url of page
-			- output_root: root directory of output
-		"""
-
-		# if dictionary not exists, make dirs
-		output_file = Generator.urltopath(url, output_root)
-		os.makedirs( os.path.dirname(output_file), exist_ok=True )
-
-		if type(content) == str :
-			with open(output_file, 'w') as file:
-				file.write(content)
-
-		else :
-			with open(output_file, 'wb') as file:
-				file.write(content)
-		
+	def getinstance() :
+		return Generator.instance
 
 
 	def __init__(self, app) :
@@ -111,25 +105,45 @@ class Generator :
 		:param app: Jikji application instance
 		"""
 		self.app = app
+		self.tmp_output_root = os.path.join(self.app.settings.ROOT_PATH, '.output')
+		
+		Generator.instance = self
+
+
+	def get_tmp_filepath(self, url) :
+		""" Get temporarily filepath by url
+		"""
+		return urltopath(url, self.tmp_output_root)
+
 
 
 	def generate(self) :
-		""" Generate pages from views
+		""" Generate pages from app
 		"""
+
+		if os.path.exists( self.tmp_output_root ) :
+			shutil.rmtree( self.tmp_output_root )
+
+		# Generate page with multiprocessing
 		processes_cnt = self.app.settings.__dict__.get('PROCESSES', 4)
 		pool = Pool(processes=4)
-
-		params = zip(self.app.pagegroups, [self.app.settings.OUTPUT_ROOT] * len(self.app.pagegroups))
-		result = pool.map(generate_pages, params)
+		result = pool.map(generate_work, self.app.pagegroups)
 		
-		self._copy_static_files(
-			self.app.settings.STATIC_ROOT,
-			self.app.settings.OUTPUT_ROOT,
+
+		# Copy static files to tmp output dir
+		utils.copytree2(
+			src = self.app.settings.STATIC_ROOT,
+			dst = self.tmp_output_root,
+			callback_after = lambda x, y : cprint.line('/%s [Asset]' % x),
 		)
 
-		
-		success_cnt = 0; error_cnt = 0
 
+		# Publish
+		pub = publisher.LocalPublisher(generator=self)
+		pub.publish()
+		
+
+		success_cnt = 0; error_cnt = 0
 		for sucesses, errors in result :
 			success_cnt += len(sucesses)
 			error_cnt += len(errors)
@@ -138,42 +152,6 @@ class Generator :
 
 
 
-	def _copy_static_files(self, static_dir, output_root, dir=None) :
-		""" Copy static files in <STATIC_PATH> declared in settings
-		
-		:params
-			- static_dir: static dir to copy
-			- output_root: output root dir that copied file will located to
-			- dir: dir path for recursively explored (if value is None, use static_dir for first call)
-		"""
-		
-		if dir is None : dir = static_dir
-		if not os.path.isdir(dir) : return
-
-		list = os.listdir(dir)
-		
-		for file in list :
-			if file[0] == '.' :
-				# continue if file is hidden
-				continue
-
-			filepath = os.path.join(dir, file)
-
-			if os.path.isdir(filepath) :
-				# if file is directory, call function recursively
-				self._copy_static_files(static_dir, output_root, filepath)
-
-			else :
-				# filepath that common string of static_dir is removed
-				trimed_path = filepath[ len(static_dir)+1 : ] 
-				dst_path = os.path.join(output_root, trimed_path)
-
-				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
-				shutil.copyfile(
-					src = filepath,
-					dst = dst_path
-				)
-
-				cprint.line('/%s [Asset]' % trimed_path)
+	
 
 

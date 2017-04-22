@@ -6,7 +6,7 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import re
+import re, os, shutil
 
 def load_module(file_path, basepath=None) :
 	""" Load python module by file path
@@ -84,6 +84,8 @@ def getprop(data, property_name) :
 	return d
 
 
+
+
 pvs_re = re.compile(r'([^\\])({\s*([a-zA-Z0-9-_$\.]+)\s*})')
 pvs_re2 = re.compile(r'()()(\$[0-9]+)')
 
@@ -106,4 +108,57 @@ def parse_varstr(rulestr, data) :
 	rv = pvs_re2.sub(pvs_callback, rv)
 	return rv
 
+
+
+
+
+def copytree2(src, dst, ignore_hidden=True,
+				callback_before=None, callback_after=None, dir=None) :
+		""" Copy files recursively
+		
+		:params
+			- src: Source dir to copy
+			- dst: Destiny root dir that copied file will located to
+			- ignore_hidden: Ignore hidden files
+			- callback_before: Callback function before file copied (If return value is False, do not copy)
+			- callback_after: Callback function after file copied
+			- dir: Directory path for recursively explored (if value is None, use src for first call)
+		"""
+		
+		if dir is None : dir = src
+		if not os.path.isdir(dir) : return
+
+		list = os.listdir(dir)
+		
+		for file in list :
+			if ignore_hidden and file[0] == '.' :
+				# continue if file is hidden
+				continue
+
+			filepath = os.path.join(dir, file)
+
+			if os.path.isdir(filepath) :
+				# if file is directory, call function recursively
+				copytree2(src, dst, ignore_hidden, callback_before, callback_after, filepath)
+
+			else :
+				# filepath that common string of src is removed
+				trimed_path = filepath[ len(src)+1 : ] 
+				dst_path = os.path.join(dst, trimed_path)
+
+				if callback_before :
+					rv = callback_before(trimed_path, filepath)
+					if rv == False :
+						continue
+
+				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
+				shutil.copy2(
+					src = filepath,
+					dst = dst_path
+				)
+
+				if callback_after :
+					callback_after(trimed_path, filepath)
+				
+				#cprint.line('/%s [Asset]' % trimed_path)
 

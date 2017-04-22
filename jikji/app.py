@@ -14,8 +14,8 @@ import jinja2
 from . import __version__
 from . import utils
 from .cprint import cprint
-from .generator import Generator
 from .view import View, Page, PageGroup
+from .generator import Generator
 
 
 def addpage(page=None, view=None, params=[]) :
@@ -186,7 +186,7 @@ class Jikji :
 		"""
 		generator = Generator(self)
 
-		cprint.section('Generate Pages in Views')
+		cprint.section('Generate Pages')
 		gen_start_time = time.time()
 
 		sucess_cnt, err_cnt = generator.generate()
