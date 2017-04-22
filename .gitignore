@@ -12,3 +12,5 @@ dist/
 .jikji*
 .jikji
 /sample_site/generated
+/tests/*/output
+
