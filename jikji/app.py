@@ -56,7 +56,6 @@ class Jikji :
 		'jinja_env',
 		'views',
 		'pagegroups',
-		'generator',
 	]
 
 	@staticmethod

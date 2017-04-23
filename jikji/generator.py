@@ -2,15 +2,19 @@
 	jikji/generator
 	----------------
 	Static Page Generator
+
+	Generated files are created in ROOTPATH/.output
+	After Generation, Publisher upload contents to destination 
 	
 	:author Prev(prevdev@gmail.com)
 """
 
 import os, shutil, traceback
 from multiprocessing import Pool
+from datetime import datetime
 
 from .cprint import cprint
-from . import utils
+from .utils import copytree2, AppDataUtil, Cache
 
 
 def mkfile(path, content) :
@@ -94,9 +98,10 @@ def generate_work(pagegroup) :
 		
 
 
-class Generator :
+class Generator(AppDataUtil) :
 
 	instance = None
+	SFMTC_KEY = '__sfmtimes' # Static File Modified Time Cache Key
 
 	@staticmethod
 	def getinstance() :
@@ -107,9 +112,14 @@ class Generator :
 		""" Constructor
 		:param app: Jikji application instance
 		"""
+
+		AppDataUtil.__init__(self, app)
+
 		self.app = app
-		self.tmp_output_root = os.path.join(self.app.settings.ROOT_PATH, '.output')
-		
+		self.tmp_output_root = self.appdata_path('output')
+
+		self.sf_mtimes = Cache(app).get(Generator.SFMTC_KEY, {})
+
 		Generator.instance = self
 
 
@@ -119,6 +129,21 @@ class Generator :
 		return urltopath(url, self.tmp_output_root)
 
 
+	def check_static_file_is_modified(self, trimed_path, fullpath) :
+		""" Check whether static file is modified with Cache
+		"""
+		if self.sf_mtimes.get(trimed_path, -1) >= os.path.getmtime(fullpath) :
+			# If static file's rendered time is ahead of files' modified time, ignore it
+			return False
+
+
+	def set_static_file_created(self, trimed_path, fullpath) :
+		""" Set static file is modified in Cache
+		"""
+
+		self.sf_mtimes[trimed_path] = datetime.now().timestamp()
+		cprint.line('/%s [Asset]' % trimed_path)
+
 
 	def generate(self) :
 		""" Generate pages from app
@@ -127,18 +152,26 @@ class Generator :
 		if os.path.exists( self.tmp_output_root ) :
 			shutil.rmtree( self.tmp_output_root )
 
+
+		if self.app.settings.__dict__.get('COPY_ALL_STATICS', False) :
+			self.sf_mtimes = {}
+
+
 		# Generate page with multiprocessing
 		processes_cnt = self.app.settings.__dict__.get('PROCESSES', 4)
 		pool = Pool(processes=4)
 		result = pool.map(generate_work, self.app.pagegroups)
 		
 
-		# Copy static files to tmp output dir
-		utils.copytree2(
+		# Copy static files to tmp-output dir
+		copytree2(
 			src = self.app.settings.STATIC_ROOT,
 			dst = self.tmp_output_root,
-			callback_after = lambda x, y : cprint.line('/%s [Asset]' % x),
+			callback_before = self.check_static_file_is_modified,
+			callback_after = self.set_static_file_created,
 		)
+
+		Cache(self.app).set(Generator.SFMTC_KEY, self.sf_mtimes)
 
 
 		# Publish

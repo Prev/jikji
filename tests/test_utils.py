@@ -6,8 +6,17 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-from jikji import utils
+from jikji import utils, Jikji
 
+
+def test_cache() :
+	app = Jikji('tests/testapp1')
+	cache = utils.Cache(app)
+
+	cache.set('foo', 'bar')
+	assert cache.get('foo') == 'bar'
+
+	
 
 def test_getprop() :
 	class TestClass :

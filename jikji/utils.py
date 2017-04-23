@@ -7,6 +7,10 @@
 """
 
 import re, os, shutil
+import json
+from urllib.parse import quote_plus, unquote_plus
+
+
 
 def load_module(file_path, basepath=None) :
 	""" Load python module by file path
@@ -159,5 +163,116 @@ def copytree2(src, dst, ignore_hidden=True,
 
 				if callback_after :
 					callback_after(trimed_path, filepath)
-				
+
+
+
+class AppDataUtil :
+
+	def __init__(self, app) :
+		self.appdata_root = os.path.join(app.settings.ROOT_PATH, '.jikji')			
+
+	def appdata_path(self, name) :
+		return os.path.join(self.appdata_root, name)
+
+
+class Cache(AppDataUtil) :
+
+	def __init__(self, app) :
+		""" Init Cache Class with app
+		"""
+		
+		AppDataUtil.__init__(self, app)
+
+		self.cachedir = self.appdata_path('cache')
+		os.makedirs(self.cachedir, exist_ok=True )
+
+
+	def getpath(self, key) :
+		""" Get cache file path of key
+		"""
+		return os.path.join(self.cachedir, quote_plus(key))
+
+
+	def get(self, key, default=None) :
+		""" Get cached data with key
+		If cache not found, return default value of param (default: None)
+		"""
+		cpath = self.getpath(key)
+		
+		if os.path.isfile(cpath) :
+			with open(cpath, 'r') as file:
+				content = file.read()
+
+			return json.loads(content)
+
+		else :
+			return default
+
+
+	def set(self, key, value) :
+		""" Set cache data with key, value
+		"""
+		cpath = self.getpath(key)
+
+		with open(cpath, 'w') as file:
+			file.write( json.dumps(value) )
+
+
+	def list(self, details=False) :
+		""" Listing cache files
+		"""
+		clist = os.listdir(self.cachedir)
+
+		if details :
+			nlist = []
+
+			for file in clist :
+				filepath = os.path.join(self.cachedir, file)
+				nlist.append('%s (%s bytes)' % (unquote_plus(file), os.path.getsize(filepath) ) )
+
+			return nlist
+
+		else :
+			return clist
+
+
+	def remove(self, key, as_pattern=False) :
+		""" Remove cache data
+		:param key: Key for cache or pattern if as_pattern is True
+		:param as_pattern: Remove caches that matches with 'key' as regex
+		"""
+
+		if not as_pattern :
+			cpath = self.getpath(key)
+
+			if os.path.isfile(cpath) :
+				os.remove(cpath)
+				cprint.line('Cache "%s" is removed' % key)
+			else :
+				cprint.error('Cache "%s" not exists' % key)
+
+
+		else :
+			r = re.compile(key)
+			clist = self.list()
+
+			something_removed = False
+
+			for file in clist :
+				filepath = os.path.join(self.cachedir, file)
+
+				if r.match(filepath) is not None :
+					os.remove(filepath)
+
+					something_removed = True
+					cprint.line('Removed: %s' % unquote_plus(file))
+
+			if not something_removed :
+				cprint.warn('No pattern matched file with "%s"' % key)
+
+
+	def remove_all(self) :
+		""" Remove all cache data
+		"""
+		self.remove('.*', as_pattern=True)
 
