@@ -51,7 +51,7 @@ def generate_work(pagegroup) :
 	:param pagegroup: PageGroup Object
 	"""
 
-	success_pages = []; errors = []
+	success_pages = []; errors = []; ignored_pages=[]
 	generator = Generator.getinstance()
 
 	pagegroup.before_rendered()
@@ -86,15 +86,18 @@ def generate_work(pagegroup) :
 		for p in success_pages :
 			os.remove(p)
 
+		ignored_pages = success_pages[:]
+		success_pages = []
 
-	pagegroup.after_rendered(success_pages, errors)
+
+	pagegroup.after_rendered(success_pages, errors, ignored_pages)
 
 	for e in errors :
 		# Display errors if exists
 		cprint.section( e['url'], red=True )
 		cprint.line( e['trackback'], yellow=True )
 
-	return success_pages, errors
+	return success_pages, errors, ignored_pages
 		
 
 
@@ -134,6 +137,7 @@ class Generator(AppDataUtil) :
 		"""
 		if self.sf_mtimes.get(trimed_path, -1) >= os.path.getmtime(fullpath) :
 			# If static file's rendered time is ahead of files' modified time, ignore it
+			self.generation_result[-1][2].append('/' + trimed_path) # Add to ignored_pages
 			return False
 
 
@@ -142,6 +146,8 @@ class Generator(AppDataUtil) :
 		"""
 
 		self.sf_mtimes[trimed_path] = datetime.now().timestamp()
+		self.generation_result[-1][0].append('/' + trimed_path) # Add to success_pages
+
 		cprint.line('/%s [Asset]' % trimed_path)
 
 
@@ -163,6 +169,10 @@ class Generator(AppDataUtil) :
 		result = pool.map(generate_work, self.app.pagegroups)
 		
 
+		# For callback
+		self.generation_result = result
+		self.generation_result.append(([], [], []))
+
 		# Copy static files to tmp-output dir
 		copytree2(
 			src = self.app.settings.STATIC_ROOT,
@@ -173,20 +183,7 @@ class Generator(AppDataUtil) :
 
 		Cache(self.app).set(Generator.SFMTC_KEY, self.sf_mtimes)
 
-
-		# Publish
-		publisher = self.app.settings.PUBLISHER
-		publisher.publish(generator=self, generation_result=result)
-		
-
-		success_cnt = 0; error_cnt = 0
-		for sucesses, errors in result :
-			success_cnt += len(sucesses)
-			error_cnt += len(errors)
-		
-		return (success_cnt, error_cnt)
-
-
+		return self.generation_result
 
 	
 

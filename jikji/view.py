@@ -214,7 +214,7 @@ class PageGroup :
 		pass
 
 
-	def after_rendered(self, success_pages, errors) :
+	def after_rendered(self, success_pages, errors, ignored_pages) :
 		""" Call after rendering finished
 		"""
 		pass

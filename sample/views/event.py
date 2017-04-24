@@ -25,10 +25,3 @@ class EventPageGroup(PageGroup) :
 			Page(view='event.index', params=(self.id, )),
 			Page(view='event.comment', params=(self.id, )),
 		)
-
-
-	def before_rendered(self) :
-		pass
-
-	def after_rendered(self, success_pages, errors) :
-		pass

@@ -182,17 +182,39 @@ class Jikji :
 
 
 
-	def generate(self) :
-		""" Generate Application
+	def generate(self, do_publishing=True) :
+		""" Generate & Publish Application
 		"""
+
+		# Generate
+		cprint.section('Generation Start')
+		start_time = time.time()
+
 		generator = Generator(self)
+		generation_result = generator.generate()
 
-		cprint.section('Generate Pages')
-		gen_start_time = time.time()
+		cost_time = round(time.time() - start_time, 2)
 
-		sucess_cnt, err_cnt = generator.generate()
-		cost_time = round(time.time() - gen_start_time, 2)
-		cprint.sep('=', 'Generate completed in %s seconds (%d success %d errors)' % (cost_time, sucess_cnt, err_cnt), blue=True, bold=True)
+		success_cnt = 0; error_cnt = 0; ignores_cnt = 0
+		for sucesses, errors, ignores in generation_result :
+			error_cnt += len(errors)
+			success_cnt += len(sucesses)
+			ignores_cnt += len(ignores)
+		
+		cprint.sep('=', 'Generation completed in %s seconds (%d success %d errors %d ignored)' % (cost_time, success_cnt, error_cnt, ignores_cnt), blue=True, bold=True)
+
+
+		if do_publishing :
+			# Publish
+			start_time = time.time()
+
+			publisher = self.settings.PUBLISHER
+			publisher.publish(generator=generator, generation_result=generation_result)
+
+			cost_time = round(time.time() - start_time, 2)
+
+			cprint.sep('=', '%d Pages are published in %s seconds' % (success_cnt, cost_time), blue=True, bold=True)
+
 
 
 
