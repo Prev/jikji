@@ -196,12 +196,12 @@ class Jikji :
 		cost_time = round(time.time() - start_time, 2)
 
 		success_cnt = 0; error_cnt = 0; ignores_cnt = 0
-		for sucesses, errors, ignores in generation_result :
+		for sucesses, errors, ignores, _ in generation_result :
 			error_cnt += len(errors)
 			success_cnt += len(sucesses)
 			ignores_cnt += len(ignores)
 		
-		cprint.sep('=', 'Generation completed in %s seconds (%d success %d errors %d ignored)' % (cost_time, success_cnt, error_cnt, ignores_cnt), blue=True, bold=True)
+		cprint.sep('=', 'Generation completed in %s seconds (%d success %d errors %d ignored)' % (cost_time, success_cnt, error_cnt, ignores_cnt), bold=True, blue=True)
 
 
 
@@ -214,8 +214,12 @@ class Jikji :
 
 			cost_time = round(time.time() - start_time, 2)
 
-			cprint.sep('=', '%d Pages are published in %s seconds' % (success_cnt, cost_time), blue=True, bold=True)
+			cprint.sep('=', '%d Pages are published in %s seconds' % (success_cnt, cost_time), bold=True, blue=True)
 
+
+		# Call scripts after generation completed
+		for file in self.settings.__dict__.get('FINISH_SCRIPTS', []) :
+			utils.load_module(file, self.settings.ROOT_PATH)
 
 
 
@@ -236,6 +240,7 @@ class Jikji :
 
 
 
+
 	def _load_module_recursive(self, dir) :
 		""" Load module in directory recursively
 		"""	
@@ -247,3 +252,5 @@ class Jikji :
 
 			elif os.path.splitext(filepath)[1] == '.py' :
 				utils.load_module(fullpath, self.settings.ROOT_PATH)
+
+

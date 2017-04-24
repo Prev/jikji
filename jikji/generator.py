@@ -77,7 +77,7 @@ def generate_work(pagegroup) :
 
 	kwarg = len(errors) and {'red': True} or {'green': True}
 	cprint.write(
-		pagegroup.get_printing_url() + ' (%d/%d) \n' % (len(success_pages), len(success_pages) + len(errors)),
+		pagegroup.get_representative_url() + ' (%d/%d) \n' % (len(success_pages), len(success_pages) + len(errors)),
 		**kwarg
 	)
 
@@ -97,7 +97,7 @@ def generate_work(pagegroup) :
 		cprint.section( e['url'], red=True )
 		cprint.line( e['trackback'], yellow=True )
 
-	return success_pages, errors, ignored_pages
+	return success_pages, errors, ignored_pages, pagegroup
 		
 
 
@@ -151,6 +151,7 @@ class Generator(AppDataUtil) :
 		cprint.line('/%s [Asset]' % trimed_path)
 
 
+
 	def generate(self, copy_all_statics=False) :
 		""" Generate pages from app
 		"""
@@ -165,15 +166,13 @@ class Generator(AppDataUtil) :
 
 		# Generate page with multiprocessing
 		processes_cnt = self.app.settings.__dict__.get('PROCESSES', 4)
-		pool = Pool(processes=4)
-		result = pool.map(generate_work, self.app.pagegroups)
+
+		pool = Pool(processes=processes_cnt)
+		self.generation_result = pool.map(generate_work, self.app.pagegroups)
 		
 
-		# For callback
-		self.generation_result = result
-		self.generation_result.append(([], [], []))
-
 		# Copy static files to tmp-output dir
+		self.generation_result.append(([], [], [], None))
 		copytree2(
 			src = self.app.settings.STATIC_ROOT,
 			dst = self.tmp_output_root,

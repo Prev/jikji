@@ -25,7 +25,10 @@ class Publisher :
 		:param generator: Generator object
 		:param generation_result: Result list of generation
 		"""
-		pass
+
+		for sucesses, errors, ignores, pagegroup in generation_result :
+			if pagegroup :
+				pagegroup.after_published(sucesses, errors, ignores)
 
 
 class LocalPublisher(Publisher) :
@@ -57,7 +60,10 @@ class LocalPublisher(Publisher) :
 			dst = self.output_root
 		)
 
+		Publisher.publish(self, generator, generation_result)
+
 		
+
 
 class S3Publisher(Publisher) :
 	""" Amazon Simple Storage Service (S3) Publisher
@@ -81,7 +87,7 @@ class S3Publisher(Publisher) :
 		cprint.line('Upload output to Amazon S3\' bucket "%s"' % self.bucket)
 
 
-		for sucesses, errors, ignores in generation_result :
+		for sucesses, errors, ignores, pagegroup in generation_result :
 			for pageurl in sucesses :
 				file = generator.get_tmp_filepath(pageurl)
 				object_key = urltopath(pageurl)
@@ -93,6 +99,9 @@ class S3Publisher(Publisher) :
 					ContentType = mimetypes.guess_type(file)[0],
 				)
 				cprint.ok('\rPUT ' + object_key)
+
+			if pagegroup :
+				pagegroup.after_published(sucesses, errors, ignores)
 
 
 
