@@ -45,12 +45,13 @@ Usage:
 
 """
 @cli.command('generate', short_help="Generate static site")
+@click.option('--clear', '-h', is_flag=True, default=False)
 @click.pass_context
-def generate_command(ctx) :
+def generate_command(ctx, clear) :
 	""" Generate static site
 	"""
 	app = ctx.obj['APP']
-	r = app.generate()
+	r = app.generate(clear=clear)
 	
 	sys.exit(r)
 

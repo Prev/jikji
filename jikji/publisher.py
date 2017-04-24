@@ -49,6 +49,8 @@ class LocalPublisher(Publisher) :
 			if os.path.exists( self.output_root ) :
 				shutil.rmtree( self.output_root )
 
+		cprint.line('Copy output to "%s"' % self.output_root)
+
 		# Copy tmp dir to output dir		
 		utils.copytree2(
 			src = generator.tmp_output_root,
@@ -59,7 +61,7 @@ class LocalPublisher(Publisher) :
 
 class S3Publisher(Publisher) :
 	""" Amazon Simple Storage Service (S3) Publisher
-		Require install & configure boto3 (https://boto3.readthedocs.io/en/latest/index.html)
+		Require install & configure boto3 (https://boto3.readthedocs.io/)
 	"""
 	
 	def __init__(self, bucket) :
@@ -72,18 +74,25 @@ class S3Publisher(Publisher) :
 	def publish(self, generator, generation_result) :
 		""" Publish to S3
 		"""
-		import boto3
+		import boto3, mimetypes
 		from .generator import urltopath
 		s3 = boto3.resource('s3')
 
-		for sucesses, errors in generation_result :
+		cprint.line('Upload output to Amazon S3\' bucket "%s"' % self.bucket)
+
+
+		for sucesses, errors, ignores in generation_result :
 			for pageurl in sucesses :
 				file = generator.get_tmp_filepath(pageurl)
+				object_key = urltopath(pageurl)
 
-				s3.Object(self.bucket, urltopath(pageurl)).put(
-					Body=open(file, 'rb'),
-					ACL='public-read'	
+				cprint.write('PUT ' + object_key)
+				s3.Object(self.bucket, object_key).put(
+					Body = open(file, 'rb'),
+					ACL = 'public-read',
+					ContentType = mimetypes.guess_type(file)[0],
 				)
+				cprint.ok('\rPUT ' + object_key)
 
 
 

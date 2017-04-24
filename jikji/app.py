@@ -182,7 +182,7 @@ class Jikji :
 
 
 
-	def generate(self, do_publishing=True) :
+	def generate(self, clear=False, do_publishing=True) :
 		""" Generate & Publish Application
 		"""
 
@@ -191,7 +191,7 @@ class Jikji :
 		start_time = time.time()
 
 		generator = Generator(self)
-		generation_result = generator.generate()
+		generation_result = generator.generate(copy_all_statics=clear)
 
 		cost_time = round(time.time() - start_time, 2)
 
@@ -202,6 +202,7 @@ class Jikji :
 			ignores_cnt += len(ignores)
 		
 		cprint.sep('=', 'Generation completed in %s seconds (%d success %d errors %d ignored)' % (cost_time, success_cnt, error_cnt, ignores_cnt), blue=True, bold=True)
+
 
 
 		if do_publishing :

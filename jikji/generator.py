@@ -151,7 +151,7 @@ class Generator(AppDataUtil) :
 		cprint.line('/%s [Asset]' % trimed_path)
 
 
-	def generate(self) :
+	def generate(self, copy_all_statics=False) :
 		""" Generate pages from app
 		"""
 
@@ -159,7 +159,7 @@ class Generator(AppDataUtil) :
 			shutil.rmtree( self.tmp_output_root )
 
 
-		if self.app.settings.__dict__.get('COPY_ALL_STATICS', False) :
+		if copy_all_statics or self.app.settings.__dict__.get('COPY_ALL_STATICS', False) :
 			self.sf_mtimes = {}
 
 
