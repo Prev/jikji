@@ -21,7 +21,7 @@ def test_generate0() :
 def test_generate1() :
 	""" Testing for generating of testapp1
 	"""
-	jikji = Jikji('tests/testapp1')
+	jikji = Jikji('tests/testapp1', mode='initialize')
 	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
 
 	if os.path.exists( OUTPUT_ROOT ) :
@@ -40,7 +40,7 @@ def test_generate1() :
 def test_generate2() :
 	""" Testing for generating of testapp2
 	"""
-	jikji = Jikji('tests/testapp2')
+	jikji = Jikji('tests/testapp2', mode='initialize')
 
 	OUTPUT_ROOT = jikji.settings.OUTPUT_ROOT
 	STATIC_ROOT = jikji.settings.STATIC_ROOT

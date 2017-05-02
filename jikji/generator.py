@@ -152,7 +152,7 @@ class Generator(AppDataUtil) :
 
 
 
-	def generate(self, copy_all_statics=False) :
+	def generate(self) :
 		""" Generate pages from app
 		"""
 
@@ -160,7 +160,7 @@ class Generator(AppDataUtil) :
 			shutil.rmtree( self.tmp_output_root )
 
 
-		if copy_all_statics or self.app.settings.__dict__.get('COPY_ALL_STATICS', False) :
+		if self.app.mode == 'initialize' or self.app.mode == 'development' :
 			self.sf_mtimes = {}
 
 

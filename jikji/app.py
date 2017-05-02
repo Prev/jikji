@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	jikji/app
 	----------------
@@ -65,13 +64,19 @@ class Jikji :
 		return Jikji.instance
 		
 
-	def __init__(self, sitepath) :
+	def __init__(self, sitepath, mode='continues') :
 		""" Initialize Jikji Application
+
+		:param mode: Generation Mode
+			- continues (default): Only generate modified files
+			- initialize: Clear old files and re-generate
+			- development: Clear old files and re-generate, do not publish
 		"""
 
 		# Assign self to single-ton instance
 		Jikji.instance = self
 
+		self.mode = mode
 		self.pagegroups = []
 
 
@@ -182,8 +187,10 @@ class Jikji :
 
 
 
-	def generate(self, clear=False, do_publishing=True) :
+	def generate(self, forbid_publish=False) :
 		""" Generate & Publish Application
+
+		:param forbid_publish: Only generate and do not publish site
 		"""
 
 		# Generate
@@ -191,7 +198,7 @@ class Jikji :
 		start_time = time.time()
 
 		generator = Generator(self)
-		generation_result = generator.generate(copy_all_statics=clear)
+		generation_result = generator.generate()
 
 		cost_time = round(time.time() - start_time, 2)
 
@@ -205,7 +212,7 @@ class Jikji :
 
 
 
-		if do_publishing :
+		if self.mode != 'development' and not forbid_publish :
 			# Publish
 			start_time = time.time()
 

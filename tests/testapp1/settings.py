@@ -10,7 +10,6 @@ TEMPLATE_ROOT = ROOT_PATH + '/templates'
 
 # Directory that includes Static files (to copied to output)
 STATIC_ROOT = ROOT_PATH + '/static'
-COPY_ALL_STATICS = True
 
 # Directory that includes View files
 VIEW_ROOT = ROOT_PATH + '/views'
