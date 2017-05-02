@@ -23,18 +23,21 @@ You can read guide from https://github.com/Prev/jikji
 \b 
 Example Usage:
    $ jikji <mysite> generate
-   $ jikji <mysite> cache list
+   $ jikji -m initialize <mysite> generate
+   $ jikji --mode development <mysite> generate
+   $ jikji <mysite> listen
 
 """
 
 
 
 @click.group(help=cli_help)
+@click.option('--mode', '-m', default='continues')
 @click.argument('sitepath', metavar='<sitepath>', type=click.Path(exists=True))
 @click.pass_context
-def cli(ctx, sitepath) :
+def cli(ctx, sitepath, mode) :
 	ctx.obj['SITEPATH'] = sitepath
-	ctx.obj['APP'] = Jikji( sitepath )
+	ctx.obj['APP'] = Jikji(sitepath=sitepath, mode=mode)
 
 
 
@@ -66,7 +69,7 @@ Usage:
 @click.option('--port', '-p', default=7000)
 @click.pass_context
 def listen_command(ctx, host, port) :
-	""" Generate static site
+	""" Open listening server for develop
 	"""
 	app = ctx.obj['APP']
 

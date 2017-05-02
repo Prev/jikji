@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	jikji/app
 	----------------
@@ -14,8 +13,8 @@ import jinja2
 from . import __version__
 from . import utils
 from .cprint import cprint
-from .generator import Generator
 from .view import View, Page, PageGroup
+from .generator import Generator
 
 
 def addpage(page=None, view=None, params=[]) :
@@ -56,7 +55,6 @@ class Jikji :
 		'jinja_env',
 		'views',
 		'pagegroups',
-		'generator',
 	]
 
 	@staticmethod
@@ -66,22 +64,34 @@ class Jikji :
 		return Jikji.instance
 		
 
-	def __init__(self, sitepath) :
+	def __init__(self, sitepath, mode='continues') :
 		""" Initialize Jikji Application
+
+		:param mode: Generation Mode
+			- continues (default): Only generate modified files
+			- initialize: Clear old files and re-generate
+			- development: Clear old files and re-generate, do not publish
 		"""
 
 		# Assign self to single-ton instance
 		Jikji.instance = self
 
+		self.mode = mode
 		self.pagegroups = []
 
 
 		cprint.line('using jikji %s' % __version__)
 		cprint.bold('Init jikji application "%s"\n' % os.path.abspath(sitepath))
-	
+		
+		# Add application dir to sys path
+		sys.path.append(sitepath)
 
 		# Load settings file		
 		self.settings = utils.load_module(os.path.join(sitepath, 'settings.py'))
+
+
+		if sitepath != self.settings.ROOT_PATH :
+			sys.path.append(self.settings.ROOT_PATH)
 
 
 		# Init jinja2 env
@@ -92,10 +102,6 @@ class Jikji :
 			lstrip_blocks = True
 		)
 		self._load_settings_to_jinja_env()
-
-
-		# Add application dir to sys path
-		sys.path.append(self.settings.ROOT_PATH)
 
 
 		# Load view files
@@ -181,17 +187,46 @@ class Jikji :
 
 
 
-	def generate(self) :
-		""" Generate Application
+	def generate(self, forbid_publish=False) :
+		""" Generate & Publish Application
+
+		:param forbid_publish: Only generate and do not publish site
 		"""
+
+		# Generate
+		cprint.section('Generation Start')
+		start_time = time.time()
+
 		generator = Generator(self)
+		generation_result = generator.generate()
 
-		cprint.section('Generate Pages in Views')
-		gen_start_time = time.time()
+		cost_time = round(time.time() - start_time, 2)
 
-		sucess_cnt, err_cnt = generator.generate()
-		cost_time = round(time.time() - gen_start_time, 2)
-		cprint.sep('=', 'Generate completed in %s seconds (%d success %d errors)' % (cost_time, sucess_cnt, err_cnt), blue=True, bold=True)
+		success_cnt = 0; error_cnt = 0; ignores_cnt = 0
+		for sucesses, errors, ignores, _ in generation_result :
+			error_cnt += len(errors)
+			success_cnt += len(sucesses)
+			ignores_cnt += len(ignores)
+		
+		cprint.sep('=', 'Generation completed in %s seconds (%d success %d errors %d ignored)' % (cost_time, success_cnt, error_cnt, ignores_cnt), bold=True, blue=True)
+
+
+
+		if self.mode != 'development' and not forbid_publish :
+			# Publish
+			start_time = time.time()
+
+			publisher = self.settings.PUBLISHER
+			publisher.publish(generator=generator, generation_result=generation_result)
+
+			cost_time = round(time.time() - start_time, 2)
+
+			cprint.sep('=', '%d Pages are published in %s seconds' % (success_cnt, cost_time), bold=True, blue=True)
+
+
+		# Call scripts after generation completed
+		for file in self.settings.__dict__.get('FINISH_SCRIPTS', []) :
+			utils.load_module(file, self.settings.ROOT_PATH)
 
 
 
@@ -212,6 +247,7 @@ class Jikji :
 
 
 
+
 	def _load_module_recursive(self, dir) :
 		""" Load module in directory recursively
 		"""	
@@ -223,3 +259,5 @@ class Jikji :
 
 			elif os.path.splitext(filepath)[1] == '.py' :
 				utils.load_module(fullpath, self.settings.ROOT_PATH)
+
+

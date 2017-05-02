@@ -1,7 +1,7 @@
 # Jikji
 [![Pypi](https://img.shields.io/pypi/v/jikji.svg)](https://pypi.python.org/pypi/jikji)
 [![Python Versions](https://img.shields.io/pypi/pyversions/jikji.svg)](https://pypi.python.org/pypi/jikji)
-[![Build Status](https://travis-ci.org/Prev/jikji.svg?branch=2.0)](https://travis-ci.org/Prev/jikji) 
+[![Build Status](https://travis-ci.org/Prev/jikji.svg)](https://travis-ci.org/Prev/jikji) 
 
 Python Static website generator fits well with Modern web
 

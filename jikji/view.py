@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	jikji/view
 	---------------
@@ -190,10 +189,8 @@ class PageGroup :
 		:param page: if page, use single-instance page list
 		:param pages: list of pages
 		"""
-		if page :
-			self.pages = [page]
-		else :
-			self.pages = pages
+		if page : 	self.pages = [page]
+		else : 		self.pages = pages
 
 
 	def getpages(self) :
@@ -202,22 +199,35 @@ class PageGroup :
 		return self.pages
 
 
-	def get_printing_url(self) :
-		""" Get url to be printed on generation
+	def get_representative_url(self) :
+		""" Get representative url of PageGroup
+			This url is used in distinguish PageGroups, and printed on generation
 		"""
 		return self.getpages()[0].geturl()
 
 
+
 	def before_rendered(self) :
-		""" Call before rendering start
+		""" Called before rendering start
+
+		[!Notice] Rendering is executed in multi-process.
+				  States in memory would not be preserved.
 		"""
 		pass
 
 
-	def after_rendered(self) :
-		""" Call after rendering finished
+	def after_rendered(self, success_pages, errors, ignored_pages) :
+		""" Called after rendering finished
+
+		[!Notice] Rendering is executed in multi-process.
+				  States in memory would not be preserved.
 		"""
 		pass
 
+
+	def after_published(self, success_pages, errors, ignored_pages) :
+		""" Called after published
+		"""
+		pass
 
 

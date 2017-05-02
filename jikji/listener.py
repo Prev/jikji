@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 	jikji/listener
 	----------------
@@ -12,7 +11,7 @@ import mimetypes
 import flask
 import jinja2
 
-from . import utils, view
+from . import utils
 from .cprint import cprint
 
 class Listener :

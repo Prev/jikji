@@ -6,7 +6,11 @@
 	:author: Prev(prevdev@gmail.com)
 """
 
-import re
+import re, os, shutil
+import json
+from urllib.parse import quote_plus, unquote_plus
+
+
 
 def load_module(file_path, basepath=None) :
 	""" Load python module by file path
@@ -84,6 +88,8 @@ def getprop(data, property_name) :
 	return d
 
 
+
+
 pvs_re = re.compile(r'([^\\])({\s*([a-zA-Z0-9-_$\.]+)\s*})')
 pvs_re2 = re.compile(r'()()(\$[0-9]+)')
 
@@ -106,4 +112,167 @@ def parse_varstr(rulestr, data) :
 	rv = pvs_re2.sub(pvs_callback, rv)
 	return rv
 
+
+
+
+
+def copytree2(src, dst, ignore_hidden=True,
+				callback_before=None, callback_after=None, dir=None) :
+		""" Copy files recursively
+		
+		:params
+			- src: Source dir to copy
+			- dst: Destiny root dir that copied file will located to
+			- ignore_hidden: Ignore hidden files
+			- callback_before: Callback function before file copied (If return value is False, do not copy)
+			- callback_after: Callback function after file copied
+			- dir: Directory path for recursively explored (if value is None, use src for first call)
+		"""
+		
+		if dir is None : dir = src
+		if not os.path.isdir(dir) : return
+
+		list = os.listdir(dir)
+		
+		for file in list :
+			if ignore_hidden and file[0] == '.' :
+				# continue if file is hidden
+				continue
+
+			filepath = os.path.join(dir, file)
+
+			if os.path.isdir(filepath) :
+				# if file is directory, call function recursively
+				copytree2(src, dst, ignore_hidden, callback_before, callback_after, filepath)
+
+			else :
+				# filepath that common string of src is removed
+				trimed_path = filepath[ len(src)+1 : ] 
+				dst_path = os.path.join(dst, trimed_path)
+
+				if callback_before :
+					rv = callback_before(trimed_path, filepath)
+					if rv == False :
+						continue
+
+				os.makedirs( os.path.dirname(dst_path), exist_ok=True )
+				shutil.copy2(
+					src = filepath,
+					dst = dst_path
+				)
+
+				if callback_after :
+					callback_after(trimed_path, filepath)
+
+
+
+class AppDataUtil :
+
+	def __init__(self, app) :
+		self.appdata_root = os.path.join(app.settings.ROOT_PATH, '.jikji')			
+
+	def appdata_path(self, name) :
+		return os.path.join(self.appdata_root, name)
+
+
+class Cache(AppDataUtil) :
+
+	def __init__(self, app) :
+		""" Init Cache Class with app
+		"""
+		
+		AppDataUtil.__init__(self, app)
+
+		self.cachedir = self.appdata_path('cache')
+		os.makedirs(self.cachedir, exist_ok=True )
+
+
+	def getpath(self, key) :
+		""" Get cache file path of key
+		"""
+		return os.path.join(self.cachedir, quote_plus(key))
+
+
+	def get(self, key, default=None) :
+		""" Get cached data with key
+		If cache not found, return default value of param (default: None)
+		"""
+		cpath = self.getpath(key)
+		
+		if os.path.isfile(cpath) :
+			with open(cpath, 'r') as file:
+				content = file.read()
+
+			return json.loads(content)
+
+		else :
+			return default
+
+
+	def set(self, key, value) :
+		""" Set cache data with key, value
+		"""
+		cpath = self.getpath(key)
+
+		with open(cpath, 'w') as file:
+			file.write( json.dumps(value) )
+
+
+	def list(self, details=False) :
+		""" Listing cache files
+		"""
+		clist = os.listdir(self.cachedir)
+
+		if details :
+			nlist = []
+
+			for file in clist :
+				filepath = os.path.join(self.cachedir, file)
+				nlist.append('%s (%s bytes)' % (unquote_plus(file), os.path.getsize(filepath) ) )
+
+			return nlist
+
+		else :
+			return clist
+
+
+	def remove(self, key, as_pattern=False) :
+		""" Remove cache data
+		:param key: Key for cache or pattern if as_pattern is True
+		:param as_pattern: Remove caches that matches with 'key' as regex
+		"""
+
+		if not as_pattern :
+			cpath = self.getpath(key)
+
+			if os.path.isfile(cpath) :
+				os.remove(cpath)
+				cprint.line('Cache "%s" is removed' % key)
+			else :
+				cprint.error('Cache "%s" not exists' % key)
+
+
+		else :
+			r = re.compile(key)
+			clist = self.list()
+
+			something_removed = False
+
+			for file in clist :
+				filepath = os.path.join(self.cachedir, file)
+
+				if r.match(filepath) is not None :
+					os.remove(filepath)
+
+					something_removed = True
+					cprint.line('Removed: %s' % unquote_plus(file))
+
+			if not something_removed :
+				cprint.warn('No pattern matched file with "%s"' % key)
+
+
+	def remove_all(self) :
+		""" Remove all cache data
+		"""
+		self.remove('.*', as_pattern=True)
 
