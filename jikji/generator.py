@@ -67,8 +67,6 @@ def generate_work(pagegroup) :
 
 		except Exception as e :
 			errors.append({
-				'pagegroup': pagegroup,
-				'page': page,
 				'url': url,
 				'trackback': traceback.format_exc(),
 				'exception': e,
@@ -83,8 +81,9 @@ def generate_work(pagegroup) :
 
 	if len(errors) and generator.app.settings.__dict__.get('ATOMIC_PAGEGROUP', False):
 		# If setting has `ATOMIC_PAGEGROUP` option, only publish none-error PageGroups
-		for p in success_pages :
-			os.remove(p)
+		for url in success_pages :
+			path = generator.get_tmp_filepath(url)
+			os.remove(path)
 
 		ignored_pages = success_pages[:]
 		success_pages = []
