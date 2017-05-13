@@ -159,7 +159,7 @@ class Generator(AppDataUtil) :
 			shutil.rmtree( self.tmp_output_root )
 
 
-		if self.app.mode == 'initialize' or self.app.mode == 'development' :
+		if 'sclear' in self.app.options :
 			self.sf_mtimes = {}
 
 

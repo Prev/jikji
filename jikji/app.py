@@ -64,19 +64,20 @@ class Jikji :
 		return Jikji.instance
 		
 
-	def __init__(self, sitepath, mode='continues') :
+	def __init__(self, sitepath, options=[]) :
 		""" Initialize Jikji Application
-
-		:param mode: Generation Mode
-			- continues (default): Only generate modified files
-			- initialize: Clear old files and re-generate
-			- development: Clear old files and re-generate, do not publish
+	
+		:param sitepath: Site Path of App
+		:param options: Application Options (List)
+						Jikji support some options below
+			- sclear: Clear old static files and re-generate
+			- nopub: Do not publish
 		"""
 
 		# Assign self to single-ton instance
 		Jikji.instance = self
 
-		self.mode = mode
+		self.options = options
 		self.pagegroups = []
 
 
@@ -187,10 +188,8 @@ class Jikji :
 
 
 
-	def generate(self, forbid_publish=False) :
+	def generate(self) :
 		""" Generate & Publish Application
-
-		:param forbid_publish: Only generate and do not publish site
 		"""
 
 		# Generate
@@ -211,7 +210,7 @@ class Jikji :
 		cprint.sep('=', 'Generation completed in %s seconds (%d success %d errors %d ignored)' % (cost_time, success_cnt, error_cnt, ignores_cnt), bold=True, blue=True)
 
 
-		if self.mode != 'development' and not forbid_publish :
+		if 'nopub' not in self.options :
 			# Publish
 			start_time = time.time()
 

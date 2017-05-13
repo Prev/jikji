@@ -23,8 +23,8 @@ You can read guide from https://github.com/Prev/jikji
 \b 
 Example Usage:
    $ jikji <mysite> generate
-   $ jikji -m initialize <mysite> generate
-   $ jikji --mode development <mysite> generate
+   $ jikji -o initialize <mysite> generate
+   $ jikji --option development <mysite> generate
    $ jikji <mysite> listen
 
 """
@@ -32,12 +32,12 @@ Example Usage:
 
 
 @click.group(help=cli_help)
-@click.option('--mode', '-m', default='continues')
+@click.option('--options', '-o', default='')
 @click.argument('sitepath', metavar='<sitepath>', type=click.Path(exists=True))
 @click.pass_context
-def cli(ctx, sitepath, mode) :
+def cli(ctx, sitepath, options) :
 	ctx.obj['SITEPATH'] = sitepath
-	ctx.obj['APP'] = Jikji(sitepath=sitepath, mode=mode)
+	ctx.obj['APP'] = Jikji(sitepath=sitepath, options=options.split(','))
 
 
 
