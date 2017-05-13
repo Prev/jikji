@@ -52,6 +52,7 @@ class LocalPublisher(Publisher) :
 			if os.path.exists( self.output_root ) :
 				shutil.rmtree( self.output_root )
 
+		cprint.line('Using LocalPublisher')
 		cprint.line('Copy output to "%s"' % self.output_root)
 
 		# Copy tmp dir to output dir		
@@ -84,6 +85,8 @@ class S3Publisher(Publisher) :
 		from .generator import urltopath
 		s3 = boto3.resource('s3')
 
+
+		cprint.line('Using S3Publisher')
 		cprint.line('Upload output to Amazon S3\' bucket "%s"' % self.bucket)
 
 
