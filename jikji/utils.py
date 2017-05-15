@@ -187,35 +187,51 @@ class Cache(AppDataUtil) :
 		os.makedirs(self.cachedir, exist_ok=True )
 
 
-	def getpath(self, key) :
+	def getpath(self, key, quote=True) :
 		""" Get cache file path of key
 		"""
-		return os.path.join(self.cachedir, quote_plus(key))
+		if quote :
+			key = quote_plus(key)
+		else :
+			dirname = os.path.dirname(key)
+			dirpath = os.path.join(self.cachedir, dirname)
+
+			if not os.path.isdir(dirpath) :
+				os.makedirs(dirpath, exist_ok=True )
+
+		return os.path.join(self.cachedir, key)
 
 
-	def get(self, key, default=None) :
+	def get(self, key, default=None, use_json=True, quote=True) :
 		""" Get cached data with key
 		If cache not found, return default value of param (default: None)
 		"""
-		cpath = self.getpath(key)
+		cpath = self.getpath(key, quote)
 		
 		if os.path.isfile(cpath) :
 			with open(cpath, 'r') as file:
 				content = file.read()
 
-			return json.loads(content)
+			if content == '' and use_json :
+				return default
+
+			if use_json : return json.loads(content)
+			else : 		  return content
 
 		else :
 			return default
 
 
-	def set(self, key, value) :
+	def set(self, key, value, use_json=True, quote=True) :
 		""" Set cache data with key, value
 		"""
-		cpath = self.getpath(key)
+		cpath = self.getpath(key, quote)
+
+		if use_json :
+			value = json.dumps(value)
 
 		with open(cpath, 'w') as file:
-			file.write( json.dumps(value) )
+			file.write( value )
 
 
 	def list(self, details=False) :

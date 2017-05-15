@@ -10,6 +10,7 @@
 import sys
 import click
 
+from . import __version__
 from .app import Jikji
 from .generator import Generator
 from .listener import Listener
@@ -17,7 +18,9 @@ from .listener import Listener
 
 cli_help = """\
 \b
-Static website generator based on RESTFul Server *~*
+Jikji """ + __version__ + """
+
+Python Static website generator for Modern web *~*
 You can read guide from https://github.com/Prev/jikji
 
 \b 
