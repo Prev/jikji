@@ -8,7 +8,7 @@
 
 """
 
-__version__ = '2.1.2'
+__version__ = '2.1.3'
 
 from .app import Jikji, addpage, addpagegroup, getview
 from .view import render_template, register_view
