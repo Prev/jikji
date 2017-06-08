@@ -16,6 +16,14 @@ def test_cache() :
 	cache.set('foo', 'bar')
 	assert cache.get('foo') == 'bar'
 
+
+def test_cache2() :
+	app = Jikji('tests/testapp2')
+	cache = utils.Cache(app)
+
+	cache.set('testcache/foo', 'bar', quote=False, use_json=False)
+	assert cache.get('testcache/foo', quote=False, use_json=False) == 'bar'
+
 	
 
 def test_getprop() :

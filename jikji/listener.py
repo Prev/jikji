@@ -47,6 +47,7 @@ class Listener :
 
 		flaskapp = flask.Flask(__name__)
 		flaskapp.add_url_rule('/', 'index', self.response)
+		flaskapp.add_url_rule('/__pages', 'list_pages', self.list_pages)
 		flaskapp.add_url_rule('/<path:url>', 'response', self.response)
 		flaskapp.run(port=port, host=host)
 
@@ -66,6 +67,23 @@ class Listener :
 		# 	url = url[0:-1]
 
 		return url
+
+
+	def list_pages(self) :
+		headers = {'Content-type': 'text/html'}
+		body = '<h1>Listening Pages</h1><ul>'
+
+		for pg in self.app.pagegroups :
+			body += '<li>'
+
+			for page in pg.getpages() :
+				url = self.format_url( page.geturl() )
+				body += '<a href="/%s">/%s</a><br>' % (url, url)
+
+			body += '</li>'
+	
+
+		return body, 200, headers
 
 
 

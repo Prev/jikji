@@ -55,6 +55,7 @@ class Jikji :
 		'jinja_env',
 		'views',
 		'pagegroups',
+		'options',
 	]
 
 	@staticmethod
@@ -77,7 +78,7 @@ class Jikji :
 		# Assign self to single-ton instance
 		Jikji.instance = self
 
-		self.options = options
+		self.options = AppOption(options)
 		self.pagegroups = []
 
 
@@ -263,5 +264,44 @@ class Jikji :
 
 			elif os.path.splitext(filepath)[1] == '.py' :
 				utils.load_module(fullpath, self.settings.ROOT_PATH)
+
+
+
+class AppOption :
+
+	_data = {}
+
+	def __init__(self, options=None) :
+		if options :		
+			if type(options) == dict :
+				self._data = options
+
+			elif type(options) == list :
+				for item in options :
+					if '=' in item :
+						tmp = item.split('=')
+						self.set(tmp[0], tmp[1])
+					else :
+						self.set(item, True)
+
+			else :
+				raise Error('Unsupported Options Type')
+
+
+	def __contains__(self, key):
+		return self.has(key)
+
+
+	def has(self, key) :
+		return key in self._data
+
+
+	def get(self, key, default=None) :
+		return self._data.get(key, default)
+
+
+	def set(self, key, value) :
+		self._data[key] = value
+
 
 
