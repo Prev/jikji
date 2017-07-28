@@ -3,7 +3,8 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/jikji.svg)](https://pypi.python.org/pypi/jikji)
 [![Build Status](https://travis-ci.org/Prev/jikji.svg)](https://travis-ci.org/Prev/jikji) 
 
-Python Static Website Generator Fits well with Modern Web
+Python Static website generator for Modern web
+
 
 ## What's different
 Like the common static website generator, [Jekyll](https://jekyllrb.com/),   it transforms **plain text**, like mardown, to HTML.
