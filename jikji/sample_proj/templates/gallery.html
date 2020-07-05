@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	<title>My Gallery</title>
+	<link rel="stylesheet" href="/stylesheet.css">
+</head>
+<body>
+	<header>
+		<div class="container">
+			<a href="/">My Gallery</a>
+		</div>
+	</header>
+    <div class="container">
+		<img src="{{ image_url }}" width="800">
+		<div>
+			{{ location }}, {{ year }}
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	<title>My Gallery</title>
+	<link rel="stylesheet" href="/stylesheet.css">
+</head>
+<body>
+	<header>
+		<div class="container">
+			<a href="/">My Gallery</a>
+		</div>
+	</header>
+    <div class="container">
+		{% for item in item_list %}
+		<div class="image-tile">
+			<a href="./{{ item.id }}">
+				<img src="{{ item.image_url }}" width="380">
+			</a>
+		</div>
+		{% endfor %}
+	</div>
+</body>
+</html>
