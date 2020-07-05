@@ -8,6 +8,8 @@
 """
 
 import sys
+import shutil
+import os.path
 import click
 
 from . import __version__
@@ -25,65 +27,51 @@ You can read guide from https://github.com/Prev/jikji
 
 \b 
 Example Usage:
-   $ jikji <mysite> generate
-   $ jikji -o initialize <mysite> generate
-   $ jikji --option development <mysite> generate
-   $ jikji <mysite> listen
+   $ jikji create <project_dir>
+   $ jikji generate <project_dir> --options [options]
+   $ jikji listen <project_dir> --options [options] --host [host] --port [port]
 
 """
 
 
 
 @click.group(help=cli_help)
+def cli():
+	pass
+
+@cli.command('create', help=cli_help)
+@click.argument('proj_dir', metavar='<proj_dir>')
+def create_command(proj_dir):
+	if os.path.isfile(proj_dir + '/settings.py'):
+		print('It seems like there is a project on %s' % proj_dir)
+		sys.exit(-1)
+
+	print(os.path.dirname(__file__) + '/sample_proj', proj_dir)
+	shutil.copytree(os.path.dirname(__file__) + '/sample_proj', proj_dir)
+
+
+@cli.command('generate', help=cli_help)
+@click.argument('proj_dir', metavar='<proj_dir>', type=click.Path(exists=True))
 @click.option('--options', '-o', default='')
-@click.argument('sitepath', metavar='<sitepath>', type=click.Path(exists=True))
-@click.pass_context
-def cli(ctx, sitepath, options) :
-	ctx.obj['SITEPATH'] = sitepath
-	ctx.obj['APP'] = Jikji(sitepath=sitepath, options=options.split(','))
-
-
-
-"""
-Command for generate
-Usage:
-	jikji <sitepath> generate
-
-"""
-@cli.command('generate', short_help="Generate static site")
-@click.pass_context
-def generate_command(ctx) :
-	""" Generate static site
-	"""
-	app = ctx.obj['APP']
+def generate_command(proj_dir, options):
+	app = Jikji(sitepath=proj_dir, options=options.split(','))
 	r = app.generate()
-	
 	sys.exit(r)
 
 
-"""
-Open listening server for develop
-Usage:
-	jikji <sitepath> listen
-
-"""
 @cli.command('listen')
+@click.argument('proj_dir', metavar='<proj_dir>', type=click.Path(exists=True))
+@click.option('--options', '-o', default='')
 @click.option('--host', '-h', default='0.0.0.0')
 @click.option('--port', '-p', default=7000)
-@click.pass_context
-def listen_command(ctx, host, port) :
-	""" Open listening server for develop
-	"""
-	app = ctx.obj['APP']
-
+def listen_command(proj_dir, options, host, port):
+	app = Jikji(sitepath=proj_dir, options=options.split(','))
 	listener = Listener(app)
 	listener.listen(host=host, port=port)
 
 
-
-def main(as_module=False) :
+def main(as_module=False):
 	""" Main function called from shell or __main__.py
-	
 	:param as_module: True if called from __main__
 	"""
 	name = __package__

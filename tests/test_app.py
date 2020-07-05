@@ -11,10 +11,6 @@ import pytest
 from jikji import Jikji
 
 
-def test_app0() :
-	jikji = Jikji('sample')
-
-
 def test_app1() :
 	""" Simple Application with one View
 	"""

@@ -11,11 +11,6 @@ import pytest
 import os
 import shutil
 from jikji import Jikji
-
-def test_generate0() :
-	jikji = Jikji('sample')
-	jikji.generate()
-
 	
 
 def test_generate1() :
